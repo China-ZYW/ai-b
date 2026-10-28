@@ -1,0 +1,164 @@
+/* ==========================================================================
+   设计令牌 · 克莱因蓝（International Klein Blue, IKB #002FA7）主题
+   —— 全站主色系：克莱因蓝 + 蓝色渐变；辅以青蓝高光渐变增强科技感
+   ========================================================================== */
+:root {
+  /* 克莱因蓝主色阶 */
+  --ikb:            #002FA7;   /* 克莱因蓝（主色） */
+  --ikb-dark:       #001F70;   /* 深克莱因蓝（悬停/按下） */
+  --ikb-darker:     #00164F;   /* 侧栏深色端 */
+  --ikb-light:      #1E5AE8;   /* 亮蓝（渐变中段） */
+  --ikb-lighter:    #4A90F5;   /* 天蓝（渐变亮端） */
+  --ikb-pale:       #E8EEFF;   /* 极浅蓝（选中底/标签底） */
+  --ikb-ghost:      #F4F7FF;   /* 幽灵蓝（卡片悬浮底） */
+  /* 品牌色 RGB 三元组：供 rgba(var(--brand-rgb), a) 生成半透明品牌色——
+     写成三元组而非整色，深浅两套主题才能各改一次就全站生效（滚动条、悬浮边框等都用它）。 */
+  --brand-rgb:      0, 47, 167;
+
+  /* 强调色（青蓝，用于高光渐变与数据可视化点缀） */
+  --accent-cyan:    #00C2FF;
+  --accent-violet:  #6A5CFF;
+
+  /* 语义色 */
+  --success:        #16C784;
+  --warning:        #FF9F43;
+  --danger:         #EA5455;
+  --info:           #8A94A6;
+
+  /* 中性色 */
+  --text-primary:   #141A2E;
+  --text-regular:   #3D4763;
+  --text-secondary: #6B7488;
+  --text-placeholder:#9AA3B5;
+  --border:         #E4E8F2;
+  --border-light:   #EEF1F8;
+  --bg-page:        #F5F7FC;
+  --bg-card:        #FFFFFF;
+  /* 浅填充（表头 / 分组条 / 次要块）：比卡片底再暗一档。
+     注意：全项目多处写作 var(--fill-light, #f5f7fa) —— 此前本令牌从未定义，一直走的是兜底字面量，
+     深浅主题无法生效；此处补上定义，那批写法自动变为主题感知。 */
+  --fill-light:     #F5F7FA;
+  --fill-lighter:   #FAFAFA;
+
+  /* ---------- 渐变（主视觉） ---------- */
+  /* 主品牌渐变：克莱因蓝 → 亮蓝 → 天蓝 */
+  --grad-brand:     linear-gradient(135deg, #002FA7 0%, #1E5AE8 52%, #4A90F5 100%);
+  /* 按钮渐变 */
+  --grad-btn:       linear-gradient(135deg, #002FA7 0%, #2E6BE6 100%);
+  --grad-btn-hover: linear-gradient(135deg, #00258A 0%, #1E5AE8 100%);
+  /* 侧栏深色渐变 */
+  --grad-sidebar:   linear-gradient(185deg, #00164F 0%, #002FA7 55%, #0B3FC4 100%);
+  /* 青蓝高光渐变（点缀/徽标/进度） */
+  --grad-accent:    linear-gradient(135deg, #00C2FF 0%, #002FA7 100%);
+  /* 顶栏玻璃渐变 */
+  --grad-topbar:    linear-gradient(90deg, rgba(255,255,255,0.96) 0%, rgba(244,247,255,0.92) 100%);
+  /* 登录页大背景渐变 */
+  --grad-auth-bg:   radial-gradient(1200px 600px at 12% 18%, #1E5AE8 0%, transparent 55%),
+                    radial-gradient(1000px 700px at 88% 82%, #00C2FF 0%, transparent 50%),
+                    linear-gradient(140deg, #00164F 0%, #002FA7 48%, #0B3FC4 100%);
+  /* 卡片顶部高光线 */
+  --grad-hairline:  linear-gradient(90deg, transparent, rgba(0,47,167,0.35), transparent);
+
+  /* ---------- 阴影 ---------- */
+  --shadow-sm:      0 2px 8px rgba(0, 31, 112, 0.06);
+  --shadow-md:      0 6px 24px rgba(0, 31, 112, 0.10);
+  --shadow-lg:      0 16px 48px rgba(0, 31, 112, 0.16);
+  --shadow-brand:   0 8px 24px rgba(0, 47, 167, 0.28);
+
+  /* ---------- 圆角 / 间距 ---------- */
+  --radius-sm:      8px;
+  --radius-md:      12px;
+  --radius-lg:      18px;
+  --radius-xl:      24px;
+
+  /* ---------- 尺寸 ---------- */
+  --topbar-h:       60px;
+  --sidebar-w:      236px;
+  --sidebar-w-mini: 68px;
+
+  /* ---------- Element Plus 主色对齐（覆盖 EP CSS 变量） ---------- */
+  --el-color-primary:         #002FA7;
+  --el-color-primary-light-3: #3359B9;
+  --el-color-primary-light-5: #6682CB;
+  --el-color-primary-light-7: #99ABDD;
+  --el-color-primary-light-8: #B3BEE6;
+  --el-color-primary-light-9: #E8EEFF;
+  --el-color-primary-dark-2:  #00258A;
+  --el-color-success:         #16C784;
+  --el-color-warning:         #FF9F43;
+  --el-color-danger:          #EA5455;
+  --el-color-error:           #EA5455;
+  --el-color-info:            #8A94A6;
+  --el-border-radius-base:    10px;
+  --el-font-size-base:        14px;
+}
+
+/* ==========================================================================
+   深色令牌（UI 明暗主题切换；html.dark 由 theme/appTheme.ts 维护）
+   —— 覆盖 :root 的语义色 / 背景 / 渐变 / 阴影，主色阶保持克莱因蓝不变
+   ========================================================================== */
+html.dark {
+  /* 主色阶：深色底上必须提亮才够对比度——原 #002FA7 在深底上偏暗、按钮与链接发灰 */
+  --ikb:            #4A90F5;
+  --ikb-dark:       #1E5AE8;
+  --ikb-darker:     #00258A;
+  --ikb-light:      #6BA6FF;
+  --ikb-lighter:    #94C0FF;
+  --ikb-pale:       #16233D;   /* 选中底/标签底：浅色模式是浅蓝，深色下换成深蓝 */
+  --ikb-ghost:      #131B2E;   /* 卡片悬浮底 */
+  --brand-rgb:      74, 144, 245;
+
+  --accent-cyan:    #33D1FF;
+  --accent-violet:  #8E82FF;
+
+  /* 语义色：深色下整体提亮一档，避免在深底上"糊成一团" */
+  --success:        #2ED9A0;
+  --warning:        #FFB35C;
+  --danger:         #FF6B6B;
+  --info:           #9AA3B5;
+
+  /* 中性色与背景：这里决定了全站 90% 的可读性 */
+  --text-primary:   #E6EAF4;
+  --text-regular:   #C2CADB;
+  --text-secondary: #8E99B0;
+  --text-placeholder:#6B7488;
+  --border:         #26304A;
+  --border-light:   #1E2739;
+  --bg-page:        #0B1020;
+  --bg-card:        #121A2C;
+  --fill-light:     #1A2338;
+  --fill-lighter:   #161E30;
+
+  /* 渐变：浅色模式的白玻璃会变成刺眼亮条，换成深色玻璃 */
+  --grad-brand:     linear-gradient(135deg, #002FA7 0%, #1E5AE8 52%, #4A90F5 100%);
+  --grad-btn:       linear-gradient(135deg, #1E5AE8 0%, #4A90F5 100%);
+  --grad-btn-hover: linear-gradient(135deg, #002FA7 0%, #1E5AE8 100%);
+  --grad-sidebar:   linear-gradient(185deg, #060A16 0%, #0E1730 55%, #132247 100%);
+  --grad-accent:    linear-gradient(135deg, #33D1FF 0%, #4A90F5 100%);
+  --grad-topbar:    linear-gradient(90deg, rgba(18,26,44,0.96) 0%, rgba(14,23,48,0.92) 100%);
+  --grad-auth-bg:   radial-gradient(1200px 600px at 12% 18%, #1E5AE8 0%, transparent 55%),
+                    radial-gradient(1000px 700px at 88% 82%, #00C2FF 0%, transparent 50%),
+                    linear-gradient(140deg, #00164F 0%, #002FA7 48%, #0B3FC4 100%);
+  --grad-hairline:  linear-gradient(90deg, transparent, rgba(74,144,245,0.45), transparent);
+
+  /* 阴影：深色下纯黑阴影才成立，浅色那套蓝调阴影在深底上会显脏 */
+  --shadow-sm:      0 2px 8px rgba(0, 0, 0, 0.35);
+  --shadow-md:      0 6px 24px rgba(0, 0, 0, 0.45);
+  --shadow-lg:      0 16px 48px rgba(0, 0, 0, 0.55);
+  --shadow-brand:   0 8px 24px rgba(30, 90, 232, 0.40);
+
+  /* Element Plus：主色跟随提亮后的蓝；EP 自身的文字/边框/填充由 dark/css-vars.css 接管，
+     这里只改与品牌强绑定的几项，避免两套变量互相打架 */
+  --el-color-primary:         #4A90F5;
+  --el-color-primary-light-3: #6BA6FF;
+  --el-color-primary-light-5: #94C0FF;
+  --el-color-primary-light-7: #B8D4FF;
+  --el-color-primary-light-8: #CCE0FF;
+  --el-color-primary-light-9: #16233D;
+  --el-color-primary-dark-2:  #1E5AE8;
+  --el-color-success:         #2ED9A0;
+  --el-color-warning:         #FFB35C;
+  --el-color-danger:          #FF6B6B;
+  --el-color-error:           #FF6B6B;
+  --el-color-info:            #9AA3B5;
+}

@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#002FA7" />
+    <title>AI 数据助理 · 对话式问数</title>
+    <script>
+      /**
+       * 首屏明暗预置（消除深浅闪烁）：在样式生效前把 <html> 的 dark class 打上。
+       *
+       * 必须是内联同步脚本——放到 main.ts 里要等模块加载完，中间那一帧会先按浅色渲染再跳深色，
+       * 深色用户每次刷新都会看到一下白闪。此处只读 localStorage 镜像（真正的权威值在后端
+       * app_user.ui_theme，登录后由 stores/user 校正），DOM/CSSOM 尚未就绪也在本脚本之前，
+       * 故只做 class 与 color-scheme 两件事，不触碰任何框架状态。
+       */
+      (function () {
+        try {
+          var m = localStorage.getItem('aibi.ui-theme')
+          if (m !== 'light' && m !== 'dark' && m !== 'system') m = 'system'
+          var dark =
+            m === 'dark' ||
+            (m === 'system' &&
+              window.matchMedia &&
+              window.matchMedia('(prefers-color-scheme: dark)').matches)
+          if (dark) {
+            document.documentElement.classList.add('dark')
+            document.documentElement.style.colorScheme = 'dark'
+          }
+        } catch (e) {
+          /* 隐私模式等读不到存储时保持浅色 */
+        }
+      })()
+    </script>
+  </head>
+  <body>
+    <div id="app"></div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

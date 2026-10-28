@@ -1,0 +1,81 @@
+# 依赖
+node_modules/
+frontend/node_modules/
+
+# ★安存治理 T1：本地凭据文件绝不入库（模板见 backend/local.env.example）
+local.env
+*.local.env
+.env
+
+# ★技术债 T6：日志/临时输出/崩溃转储/探针目录
+*_out.txt
+hs_err_pid*
+replay_pid*
+.probe/
+**/_archive/
+/data/uploads/
+/data/materials/
+# 从 backend/ 目录启动时 aibi.upload.dir 默认 ./data/uploads 会解析到仓内（历史已有一批 tracked 上传件），
+# 此处先堵住后续入库；默认值改为仓库外固定路径需运维侧先确认 AIBI_UPLOAD_DIR（T6 挂账）
+backend/data/
+
+# ★T6 收尾：bench/ 是 NL2SQL 本地评测工具集，其 llm_keys.env 存有真实 LLM API Key（provider|base_url|model|key），
+#   整目录不入库；*keys.env 为全局兜底，防今后任何密钥文件被意外提交
+backend/bench/
+*keys.env
+
+# ★T6 收尾：构建命令输出与从生产抓下来的调试产物（均为一次性输出，零引用已实证）
+backend/mvn_*.txt
+backend/prod_*
+backend/verify_*.out
+backend/*.out
+scripts/smoke-result.tsv
+stats.txt
+
+# ★T5 收尾：本地 CI 门禁（scripts/ci_check.ps1）的生成工件目录（写守卫审计报告等），不入库
+.ci-artifacts/
+
+# 构建产物（★没有这段会把 target/*.class 与 dist 提交进仓库）
+backend/target/
+frontend/dist/
+frontend/dist_old_*/
+# 构建前把旧 dist 改名留下的临时备份（npm run build 前的 rename 兜底）——不是源码，勿提交
+frontend/dist_bak_*/
+target/
+dist/
+
+# 日志与构建输出
+*.log
+backend/mvn_*.log
+backend/*.log
+frontend/*.log
+# init 脚本后台启动记录的服务 PID（运行态产物，勿入库）
+*.pid
+
+# 临时调试脚本 / 一次性输出
+backend/_*.py
+backend/_*.txt
+backend/zz_*.txt
+_checklog.py
+_ls.txt
+
+# IDE / 编辑器
+.idea/
+.vscode/
+*.iml
+*.swp
+
+# 系统文件
+.DS_Store
+Thumbs.db
+
+# 运行期回滚备份
+*.jar.bak.*
+*.bak.*
+
+# 工作区数据（MEMORY / 记忆，非源码，勿提交）
+.workbuddy/
+
+# Python 缓存
+__pycache__/
+*.pyc

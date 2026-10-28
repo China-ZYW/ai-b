@@ -1,0 +1,391 @@
+[
+  {
+    "code": "business-overview",
+    "name": "经营概览",
+    "category": "综合",
+    "description": "营收趋势、品类占比、区域销售与 Top 商品明细的综合经营驾驶舱",
+    "icon": "TrendCharts",
+    "theme": "dark",
+    "layout": [
+      {"i":"slot0","metricId":null,"x":0,"y":0,"w":8,"h":4,"title":"营收趋势"},
+      {"i":"slot1","metricId":null,"x":8,"y":0,"w":4,"h":4,"title":"品类占比"},
+      {"i":"slot2","metricId":null,"x":0,"y":4,"w":6,"h":4,"title":"区域销售"},
+      {"i":"slot3","metricId":null,"x":6,"y":4,"w":6,"h":4,"title":"Top商品明细"}
+    ]
+  },
+  {
+    "code": "sales-analysis",
+    "name": "销售分析",
+    "category": "销售",
+    "description": "销售额趋势、品类/渠道构成与销售明细的分析驾驶舱",
+    "icon": "ShoppingCart",
+    "theme": "dark",
+    "layout": [
+      {"i":"slot0","metricId":null,"x":0,"y":0,"w":12,"h":4,"title":"销售额趋势"},
+      {"i":"slot1","metricId":null,"x":0,"y":4,"w":6,"h":4,"title":"各品类销售额"},
+      {"i":"slot2","metricId":null,"x":6,"y":4,"w":6,"h":4,"title":"销售渠道占比"},
+      {"i":"slot3","metricId":null,"x":0,"y":8,"w":12,"h":4,"title":"销售明细"}
+    ]
+  },
+  {
+    "code": "user-growth",
+    "name": "用户增长",
+    "category": "用户",
+    "description": "新增用户趋势、来源占比、活跃度与留存明细的增长驾驶舱",
+    "icon": "User",
+    "theme": "dark",
+    "layout": [
+      {"i":"slot0","metricId":null,"x":0,"y":0,"w":8,"h":4,"title":"新增用户趋势"},
+      {"i":"slot1","metricId":null,"x":8,"y":0,"w":4,"h":4,"title":"用户来源占比"},
+      {"i":"slot2","metricId":null,"x":0,"y":4,"w":6,"h":4,"title":"活跃用户"},
+      {"i":"slot3","metricId":null,"x":6,"y":4,"w":6,"h":4,"title":"留存明细"}
+    ]
+  },
+  {
+    "code": "ops-monitor",
+    "name": "运营监控",
+    "category": "运营",
+    "description": "订单量趋势、履约状态、库存分布与异常订单明细的监控驾驶舱",
+    "icon": "Monitor",
+    "theme": "dark",
+    "layout": [
+      {"i":"slot0","metricId":null,"x":0,"y":0,"w":6,"h":4,"title":"订单量趋势"},
+      {"i":"slot1","metricId":null,"x":6,"y":0,"w":6,"h":4,"title":"履约状态占比"},
+      {"i":"slot2","metricId":null,"x":0,"y":4,"w":6,"h":4,"title":"各仓库存"},
+      {"i":"slot3","metricId":null,"x":6,"y":4,"w":6,"h":4,"title":"异常订单明细"}
+    ]
+  },
+  {
+    "code": "sales-overview",
+    "name": "销售总览",
+    "category": "销售",
+    "description": "销售额趋势、目标完成率与区域/商品排行的一屏销售驾驶舱",
+    "icon": "Goods",
+    "theme": "dark",
+    "layout": [
+      {"i":"slot0","metricId":null,"x":0,"y":0,"w":8,"h":4,"title":"销售额趋势"},
+      {"i":"slot1","metricId":null,"x":8,"y":0,"w":4,"h":4,"title":"目标完成率"},
+      {"i":"slot2","metricId":null,"x":0,"y":4,"w":6,"h":4,"title":"Top区域销售"},
+      {"i":"slot3","metricId":null,"x":6,"y":4,"w":6,"h":4,"title":"Top商品销售"}
+    ]
+  },
+  {
+    "code": "sales-rank",
+    "name": "销售排行",
+    "category": "销售",
+    "description": "销售员、品类与区域多维业绩排行的销售驾驶舱",
+    "icon": "Medal",
+    "theme": "dark",
+    "layout": [
+      {"i":"slot0","metricId":null,"x":0,"y":0,"w":12,"h":5,"title":"销售员业绩排行"},
+      {"i":"slot1","metricId":null,"x":0,"y":5,"w":6,"h":5,"title":"品类销售排行"},
+      {"i":"slot2","metricId":null,"x":6,"y":5,"w":6,"h":5,"title":"区域销售排行"}
+    ]
+  },
+  {
+    "code": "finance-overview",
+    "name": "财务概览",
+    "category": "财务",
+    "description": "营收、利润、成本结构与现金流的综合财务驾驶舱",
+    "icon": "Money",
+    "theme": "dark",
+    "layout": [
+      {"i":"slot0","metricId":null,"x":0,"y":0,"w":8,"h":4,"title":"营收趋势"},
+      {"i":"slot1","metricId":null,"x":8,"y":0,"w":4,"h":4,"title":"利润趋势"},
+      {"i":"slot2","metricId":null,"x":0,"y":4,"w":6,"h":4,"title":"成本结构"},
+      {"i":"slot3","metricId":null,"x":6,"y":4,"w":6,"h":4,"title":"现金流"}
+    ]
+  },
+  {
+    "code": "profit-analysis",
+    "name": "利润分析",
+    "category": "财务",
+    "description": "毛利率趋势、各业务利润与利润构成的利润驾驶舱",
+    "icon": "Coin",
+    "theme": "dark",
+    "layout": [
+      {"i":"slot0","metricId":null,"x":0,"y":0,"w":12,"h":4,"title":"毛利率趋势"},
+      {"i":"slot1","metricId":null,"x":0,"y":4,"w":6,"h":4,"title":"各业务利润"},
+      {"i":"slot2","metricId":null,"x":6,"y":4,"w":6,"h":4,"title":"利润构成"},
+      {"i":"slot3","metricId":null,"x":0,"y":8,"w":12,"h":4,"title":"利润率对比"}
+    ]
+  },
+  {
+    "code": "cashflow",
+    "name": "现金流分析",
+    "category": "财务",
+    "description": "经营/投资/筹资现金流与现金余额的现金流驾驶舱",
+    "icon": "Wallet",
+    "theme": "dark",
+    "layout": [
+      {"i":"slot0","metricId":null,"x":0,"y":0,"w":8,"h":4,"title":"经营性现金流"},
+      {"i":"slot1","metricId":null,"x":8,"y":0,"w":4,"h":4,"title":"投资/筹资现金流"},
+      {"i":"slot2","metricId":null,"x":0,"y":4,"w":12,"h":4,"title":"现金余额"}
+    ]
+  },
+  {
+    "code": "cost-structure",
+    "name": "成本结构",
+    "category": "财务",
+    "description": "成本构成、各项费用趋势与单位成本的降本驾驶舱",
+    "icon": "Histogram",
+    "theme": "dark",
+    "layout": [
+      {"i":"slot0","metricId":null,"x":0,"y":0,"w":6,"h":4,"title":"成本构成"},
+      {"i":"slot1","metricId":null,"x":6,"y":0,"w":6,"h":4,"title":"各项费用趋势"},
+      {"i":"slot2","metricId":null,"x":0,"y":4,"w":12,"h":4,"title":"单位成本"}
+    ]
+  },
+  {
+    "code": "ops-overview",
+    "name": "运营总览",
+    "category": "运营",
+    "description": "订单趋势、转化漏斗、活跃用户与客诉的运营驾驶舱",
+    "icon": "Operation",
+    "theme": "dark",
+    "layout": [
+      {"i":"slot0","metricId":null,"x":0,"y":0,"w":8,"h":4,"title":"订单趋势"},
+      {"i":"slot1","metricId":null,"x":8,"y":0,"w":4,"h":4,"title":"转化漏斗"},
+      {"i":"slot2","metricId":null,"x":0,"y":4,"w":6,"h":4,"title":"活跃用户"},
+      {"i":"slot3","metricId":null,"x":6,"y":4,"w":6,"h":4,"title":"客诉"}
+    ]
+  },
+  {
+    "code": "order-fulfillment",
+    "name": "订单履约",
+    "category": "运营",
+    "description": "订单量、履约时效、各仓发货与异常订单的履约驾驶舱",
+    "icon": "Van",
+    "theme": "dark",
+    "layout": [
+      {"i":"slot0","metricId":null,"x":0,"y":0,"w":8,"h":4,"title":"订单量"},
+      {"i":"slot1","metricId":null,"x":8,"y":0,"w":4,"h":4,"title":"履约时效"},
+      {"i":"slot2","metricId":null,"x":0,"y":4,"w":6,"h":4,"title":"各仓发货量"},
+      {"i":"slot3","metricId":null,"x":6,"y":4,"w":6,"h":4,"title":"异常订单"}
+    ]
+  },
+  {
+    "code": "inventory",
+    "name": "库存分析",
+    "category": "运营",
+    "description": "库存总量、周转、各仓分布与滞销商品的库存驾驶舱",
+    "icon": "Box",
+    "theme": "dark",
+    "layout": [
+      {"i":"slot0","metricId":null,"x":0,"y":0,"w":8,"h":4,"title":"库存总量"},
+      {"i":"slot1","metricId":null,"x":8,"y":0,"w":4,"h":4,"title":"库存周转"},
+      {"i":"slot2","metricId":null,"x":0,"y":4,"w":6,"h":4,"title":"各仓库存"},
+      {"i":"slot3","metricId":null,"x":6,"y":4,"w":6,"h":4,"title":"滞销商品"}
+    ]
+  },
+  {
+    "code": "user-overview",
+    "name": "用户总览",
+    "category": "用户",
+    "description": "用户规模、新增趋势、活跃度与留存率的用户驾驶舱",
+    "icon": "UserFilled",
+    "theme": "dark",
+    "layout": [
+      {"i":"slot0","metricId":null,"x":0,"y":0,"w":6,"h":4,"title":"用户总量"},
+      {"i":"slot1","metricId":null,"x":6,"y":0,"w":6,"h":4,"title":"新增趋势"},
+      {"i":"slot2","metricId":null,"x":0,"y":4,"w":6,"h":4,"title":"活跃用户"},
+      {"i":"slot3","metricId":null,"x":6,"y":4,"w":6,"h":4,"title":"留存率"}
+    ]
+  },
+  {
+    "code": "user-retention",
+    "name": "用户留存",
+    "category": "用户",
+    "description": "留存曲线、分群留存与流失预警的留存驾驶舱",
+    "icon": "Aim",
+    "theme": "dark",
+    "layout": [
+      {"i":"slot0","metricId":null,"x":0,"y":0,"w":8,"h":4,"title":"留存曲线"},
+      {"i":"slot1","metricId":null,"x":8,"y":0,"w":4,"h":4,"title":"分群留存"},
+      {"i":"slot2","metricId":null,"x":0,"y":4,"w":12,"h":4,"title":"流失预警"}
+    ]
+  },
+  {
+    "code": "marketing-campaign",
+    "name": "营销活动",
+    "category": "市场",
+    "description": "活动 ROI、渠道转化与活动效果的营销驾驶舱",
+    "icon": "Promotion",
+    "theme": "dark",
+    "layout": [
+      {"i":"slot0","metricId":null,"x":0,"y":0,"w":8,"h":4,"title":"活动ROI"},
+      {"i":"slot1","metricId":null,"x":8,"y":0,"w":4,"h":4,"title":"渠道转化"},
+      {"i":"slot2","metricId":null,"x":0,"y":4,"w":12,"h":4,"title":"活动效果"}
+    ]
+  },
+  {
+    "code": "marketing-overview",
+    "name": "市场总览",
+    "category": "市场",
+    "description": "曝光趋势、转化漏斗、各渠道表现与活动排行的市场驾驶舱",
+    "icon": "DataBoard",
+    "theme": "dark",
+    "layout": [
+      {"i":"slot0","metricId":null,"x":0,"y":0,"w":8,"h":4,"title":"曝光趋势"},
+      {"i":"slot1","metricId":null,"x":8,"y":0,"w":4,"h":4,"title":"转化漏斗"},
+      {"i":"slot2","metricId":null,"x":0,"y":4,"w":6,"h":4,"title":"各渠道表现"},
+      {"i":"slot3","metricId":null,"x":6,"y":4,"w":6,"h":4,"title":"活动排行"}
+    ]
+  },
+  {
+    "code": "hr-overview",
+    "name": "人力总览",
+    "category": "人力",
+    "description": "人员规模、招聘漏斗与离职率的人力驾驶舱",
+    "icon": "OfficeBuilding",
+    "theme": "dark",
+    "layout": [
+      {"i":"slot0","metricId":null,"x":0,"y":0,"w":6,"h":4,"title":"人员规模"},
+      {"i":"slot1","metricId":null,"x":6,"y":0,"w":6,"h":4,"title":"招聘漏斗"},
+      {"i":"slot2","metricId":null,"x":0,"y":4,"w":12,"h":4,"title":"离职率"}
+    ]
+  },
+  {
+    "code": "cs-overview",
+    "name": "客服总览",
+    "category": "客服",
+    "description": "工单量、响应时效、满意度与待处理的客服驾驶舱",
+    "icon": "Service",
+    "theme": "dark",
+    "layout": [
+      {"i":"slot0","metricId":null,"x":0,"y":0,"w":8,"h":4,"title":"工单量"},
+      {"i":"slot1","metricId":null,"x":8,"y":0,"w":4,"h":4,"title":"响应时效"},
+      {"i":"slot2","metricId":null,"x":0,"y":4,"w":6,"h":4,"title":"满意度"},
+      {"i":"slot3","metricId":null,"x":6,"y":4,"w":6,"h":4,"title":"待处理"}
+    ]
+  },
+  {
+    "code": "boss-dashboard",
+    "name": "老板驾驶舱",
+    "category": "综合",
+    "description": "核心指标、营收、利润与关键运营指标的一页纸驾驶舱",
+    "icon": "Trophy",
+    "theme": "dark",
+    "layout": [
+      {"i":"slot0","metricId":null,"x":0,"y":0,"w":12,"h":4,"title":"核心指标"},
+      {"i":"slot1","metricId":null,"x":0,"y":4,"w":6,"h":4,"title":"营收"},
+      {"i":"slot2","metricId":null,"x":6,"y":4,"w":6,"h":4,"title":"利润"},
+      {"i":"slot3","metricId":null,"x":0,"y":8,"w":12,"h":4,"title":"关键运营指标"}
+    ]
+  },
+  {
+    "code": "kpi-infographic",
+    "name": "经营亮点（信息图）",
+    "category": "综合",
+    "description": "用信息图卡片速览核心经营亮点（内容驱动，不取数，超管可在 ContentOps 改文案）",
+    "icon": "Star",
+    "theme": "dark",
+    "layout": [
+      {
+        "i":"slot0","metricId":null,"x":0,"y":0,"w":12,"h":6,"title":"经营亮点速览",
+        "kind":"infographic",
+        "infographic":{
+          "template":"list-grid-badge-card",
+          "items":[
+            {"label":"GMV","desc":"本月累计成交","value":1280},
+            {"label":"新增用户","desc":"本月新增","value":36},
+            {"label":"客单价","desc":"平均客单价","value":356},
+            {"label":"复购率","desc":"近30天复购","value":42}
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "code": "milestone-infographic",
+    "name": "里程碑（信息图）",
+    "category": "综合",
+    "description": "用时间轴信息图展示关键里程碑（内容驱动，不取数）",
+    "icon": "Calendar",
+    "theme": "dark",
+    "layout": [
+      {
+        "i":"slot0","metricId":null,"x":0,"y":0,"w":12,"h":8,"title":"关键里程碑",
+        "kind":"infographic",
+        "infographic":{
+          "template":"sequence-timeline-simple",
+          "items":[
+            {"label":"Q1 立项","desc":"完成需求评审与排期"},
+            {"label":"Q2 内测","desc":"核心指标上线"},
+            {"label":"Q3 公测","desc":"开放灰度用户"},
+            {"label":"Q4 全量","desc":"正式商业化"}
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "code": "steps-infographic",
+    "name": "增长步骤（信息图）",
+    "category": "综合",
+    "description": "用步骤信息图展示增长闭环（内容驱动，不取数）",
+    "icon": "Promotion",
+    "theme": "dark",
+    "layout": [
+      {
+        "i":"slot0","metricId":null,"x":0,"y":0,"w":12,"h":6,"title":"增长闭环",
+        "kind":"infographic",
+        "infographic":{
+          "template":"sequence-steps-simple",
+          "items":[
+            {"label":"拉新","desc":"渠道投放与裂变"},
+            {"label":"激活","desc":"首单转化引导"},
+            {"label":"留存","desc":"会员体系运营"},
+            {"label":"变现","desc":"复购与增值"}
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "code": "highlights-infographic",
+    "name": "能力亮点（信息图）",
+    "category": "综合",
+    "description": "用要点列表信息图展示平台能力（内容驱动，不取数）",
+    "icon": "List",
+    "theme": "dark",
+    "layout": [
+      {
+        "i":"slot0","metricId":null,"x":0,"y":0,"w":12,"h":6,"title":"平台能力亮点",
+        "kind":"infographic",
+        "infographic":{
+          "template":"list-row-simple-horizontal-arrow",
+          "items":[
+            {"label":"数据驱动","desc":"指标口径统一沉淀"},
+            {"label":"实时预警","desc":"阈值触发自动归因"},
+            {"label":"自然语言","desc":"对话式取数"},
+            {"label":"一键分享","desc":"大屏公开可嵌入"}
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "code": "priority-infographic",
+    "name": "优先级（信息图）",
+    "category": "综合",
+    "description": "用金字塔信息图展示目标优先级（内容驱动，不取数）",
+    "icon": "Aim",
+    "theme": "dark",
+    "layout": [
+      {
+        "i":"slot0","metricId":null,"x":0,"y":0,"w":12,"h":6,"title":"目标优先级",
+        "kind":"infographic",
+        "infographic":{
+          "template":"list-pyramid-compact-card",
+          "items":[
+            {"label":"P0 营收增长","desc":"核心目标"},
+            {"label":"P1 用户留存","desc":"关键抓手"},
+            {"label":"P2 效率提升","desc":"降本增效"},
+            {"label":"P3 体验优化","desc":"长期投入"}
+          ]
+        }
+      }
+    ]
+  }
+]

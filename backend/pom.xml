@@ -1,0 +1,503 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>3.2.5</version>
+        <relativePath/>
+    </parent>
+
+    <groupId>com.aibi</groupId>
+    <artifactId>aibi-backend</artifactId>
+    <version>0.1.0</version>
+    <name>aibi-backend</name>
+    <description>AI 数据助理 MVP 后端骨架（模块化单体，适配 4核4G）</description>
+
+    <properties>
+        <java.version>17</java.version>
+        <jjwt.version>0.12.5</jjwt.version>
+        <!-- 必须与 MyBatis-Plus 3.5.5 自带的 jsqlparser 版本一致（勿单独升级，否则租户拦截器会 NoSuchMethodError） -->
+        <jsqlparser.version>4.6</jsqlparser.version>
+        <mybatis-plus.version>3.5.5</mybatis-plus.version>
+        <commons-csv.version>1.10.0</commons-csv.version>
+        <sqlite-jdbc.version>3.45.3.0</sqlite-jdbc.version>
+        <mariadb-jdbc.version>3.4.1</mariadb-jdbc.version>
+        <poi.version>5.2.5</poi.version>
+        <!-- 对象存储（S3/OSS/MinIO）与 Parquet 解析依赖版本 -->
+        <aws-sdk.version>2.55.5</aws-sdk.version>
+        <parquet.version>1.13.1</parquet.version>
+    </properties>
+
+    <dependencies>
+        <!-- Web（含内嵌 Tomcat + Jackson） -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+        <!-- 安全（Spring Security 6） -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-security</artifactId>
+        </dependency>
+        <!-- 参数校验 -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-validation</artifactId>
+        </dependency>
+        <!-- JDBC（JdbcTemplate + HikariCP），问数只读执行 -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-jdbc</artifactId>
+        </dependency>
+        <!-- 健康检查 -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+        <!--
+          邮件：预警通知的 EMAIL 渠道（EmailAlertNotifier）。
+          ★只取 spring-context-support 里的 JavaMailSenderImpl + jakarta.mail，不依赖 Spring Boot 的
+          MailSenderAutoConfiguration（SMTP 参数来自运行期 aibi.notify.mail.*，由代码显式构造 sender，
+          故 yml 里不配 spring.mail.* 也不会启动失败）。
+        -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-mail</artifactId>
+        </dependency>
+        <!-- AOP：权限注解切面（@RequiresPermission/@RequiresRole/@CheckResourceAccess）与审计落库切面 -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-aop</artifactId>
+        </dependency>
+
+        <!-- MySQL 驱动（版本由 Spring Boot 管理）；Doris / StarRocks 兼容 MySQL 协议，亦复用此驱动 -->
+        <dependency>
+            <groupId>com.mysql</groupId>
+            <artifactId>mysql-connector-j</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+
+        <!-- MariaDB 驱动：DataSourceType.MARIADB 已登记（org.mariadb.jdbc.Driver），与 MySQL 协议二进制兼容、
+             复用 Family.MYSQL 方言族；独立驱动以避免 MySQL Connector/J 在部分 MariaDB 版本（如 RETURNING / 认证插件）的差异。
+             用独立 jar 而非复用 MySQL 驱动，使「选 MARIADB 建源」运行时不再 ClassNotFoundException。 -->
+        <dependency>
+            <groupId>org.mariadb.jdbc</groupId>
+            <artifactId>mariadb-java-client</artifactId>
+            <version>${mariadb-jdbc.version}</version>
+            <scope>runtime</scope>
+        </dependency>
+
+        <!-- MyBatis-Plus：POOL 隔离靠 TenantLineInnerInterceptor 自动注入 tenant_id（自带 jsqlparser 4.6，与上方锁定版本一致） -->
+        <dependency>
+            <groupId>com.baomidou</groupId>
+            <artifactId>mybatis-plus-spring-boot3-starter</artifactId>
+            <version>${mybatis-plus.version}</version>
+        </dependency>
+
+        <!-- PostgreSQL 驱动（版本由 Spring Boot BOM 管理） -->
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+
+        <!-- SQLite：文件类数据源（CSV/Excel/Parquet/对象存储）载入内存库后以 SQL 查询 -->
+        <dependency>
+            <groupId>org.xerial</groupId>
+            <artifactId>sqlite-jdbc</artifactId>
+            <version>${sqlite-jdbc.version}</version>
+            <scope>runtime</scope>
+        </dependency>
+
+        <!-- CSV 解析（文件类数据源） -->
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-csv</artifactId>
+            <version>${commons-csv.version}</version>
+        </dependency>
+
+        <!--
+          企业级冷数据源驱动（SQL Server / Oracle / ClickHouse / Hive / Trino / Presto）已于 T9
+          外提到可选 profile <code>drivers-extended</code>（见文件尾）：默认包只带高频驱动
+          （MySQL 系 / PG / SQLite），胖 jar 从 162.8MB 收敛；需要冷驱动时 mvn package -Pdrivers-extended，
+          或运行期把驱动 jar 放入插件目录 aibi.datasource.driver-dir（DriverPluginRegistry 反射加载，
+          未安装时建池给“驱动未安装”优雅报错——§90 链路）。
+        -->
+
+        <!-- Excel 解析（文件类数据源 .xlsx/.xls）：POI 流式读入 SQLite，与 CSV 复用同一查询链路 -->
+        <dependency>
+            <groupId>org.apache.poi</groupId>
+            <artifactId>poi-ooxml</artifactId>
+            <version>${poi.version}</version>
+        </dependency>
+
+        <!--
+          Parquet 解析（V4.45 §92）：本地 Parquet 文件源与对象存储下载对象共用。
+          纯 Java（parquet-avro + parquet-hadoop），排除 mapreduce/yarn 重传递依赖以收敛体积。
+          FileTableReader 直接用 AvroParquetReader 打开、且显式引用 org.apache.hadoop.conf.Configuration
+          与 org.apache.hadoop.fs.Path → hadoop-common 必须在 compile scope 显式声明（hive-jdbc 是 runtime，
+          其传递的 hadoop-common 不会进编译 classpath，否则 org.apache.hadoop.conf 包"不存在"）。
+          压缩编解码 snappy/zstd 由 parquet-hadoop 传递依赖提供，跨平台安全。
+        -->
+        <dependency>
+            <groupId>org.apache.parquet</groupId>
+            <artifactId>parquet-avro</artifactId>
+            <version>${parquet.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.parquet</groupId>
+            <artifactId>parquet-hadoop</artifactId>
+            <version>${parquet.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.apache.hadoop</groupId>
+                    <artifactId>hadoop-mapreduce-client-core</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.hadoop</groupId>
+                    <artifactId>hadoop-mapreduce-client-common</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.hadoop</groupId>
+                    <artifactId>hadoop-mapreduce-client-jobclient</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.hadoop</groupId>
+                    <artifactId>hadoop-yarn-api</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.hadoop</groupId>
+                    <artifactId>hadoop-yarn-common</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.hadoop</groupId>
+                    <artifactId>hadoop-yarn-client</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.hadoop</groupId>
+                    <artifactId>hadoop-yarn-server-common</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <!--
+          Hadoop Common（compile scope，必显式声明）：FileTableReader 的 Parquet 打开路径直接引用
+          org.apache.hadoop.conf.Configuration 与 org.apache.hadoop.fs.Path；不声明则编译期
+          "程序包 org.apache.hadoop.conf 不存在"。版本历史上与 hive-jdbc 4.0.0 传递的 hadoop 对齐（3.3.6），
+          T9 后 hive 移出默认包，hadoop-common 成为 Parquet 链路的唯一持有者（hadoop-auth /
+          hadoop-shaded-guava/protobuf 为其直接传递，不受影响）；排除 yarn/mapreduce 重传递依赖以收敛体积。
+          T9 额外排除 curator/zookeeper 支路：Parquet 本地读只用到 Configuration/LocalFileSystem，
+          不触 HA NameNode ZK 服务发现；drivers-extended 形态下 hive-jdbc 会自行带回二者，不受影响。
+        -->
+        <dependency>
+            <groupId>org.apache.hadoop</groupId>
+            <artifactId>hadoop-common</artifactId>
+            <version>3.3.6</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.apache.hadoop</groupId>
+                    <artifactId>hadoop-mapreduce-client-core</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.hadoop</groupId>
+                    <artifactId>hadoop-mapreduce-client-common</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.hadoop</groupId>
+                    <artifactId>hadoop-mapreduce-client-jobclient</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.hadoop</groupId>
+                    <artifactId>hadoop-yarn-api</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.hadoop</groupId>
+                    <artifactId>hadoop-yarn-common</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.hadoop</groupId>
+                    <artifactId>hadoop-yarn-client</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.hadoop</groupId>
+                    <artifactId>hadoop-yarn-server-common</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.curator</groupId>
+                    <artifactId>curator-client</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.curator</groupId>
+                    <artifactId>curator-framework</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.curator</groupId>
+                    <artifactId>curator-recipes</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.zookeeper</groupId>
+                    <artifactId>zookeeper</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.zookeeper</groupId>
+                    <artifactId>zookeeper-jute</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <!--
+          Hadoop MapReduce（runtime）：T9 验证时发现 V4.45 遗留隐藏缺陷——parquet-hadoop 1.13.1 的
+          读链路 HadoopReadOptions$Builder 初始化硬引用 org.apache.hadoop.mapreduce.lib.input.FileInputFormat
+          （字节码验证阶段即加载，非懒触发），旧生产 fat jar 不带任何 mapreduce jar → 消费侧 Parquet
+          文件源实际 NoClassDefFoundError。历史验证测试跑在 test classpath（本 jar 为 test scope）故未暴露。
+          提升为 runtime 修复消费链路。版本与 hadoop-common 对齐（3.3.6）。
+        -->
+        <dependency>
+            <groupId>org.apache.hadoop</groupId>
+            <artifactId>hadoop-mapreduce-client-core</artifactId>
+            <version>3.3.6</version>
+            <scope>runtime</scope>
+            <exclusions>
+                <!-- 只需 FileInputFormat 类可供字节码验证：本地文件链路不碰 HDFS/YARN/Kerberos，
+                     朴素 guava/protobuf 与 hadoop-shaded 版共存反而多余，一并排除以回收 20MB 传递闭包 -->
+                <exclusion>
+                    <groupId>org.apache.hadoop</groupId>
+                    <artifactId>hadoop-hdfs-client</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.hadoop</groupId>
+                    <artifactId>hadoop-yarn-api</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.hadoop</groupId>
+                    <artifactId>hadoop-yarn-client</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.hadoop</groupId>
+                    <artifactId>hadoop-yarn-common</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>com.google.guava</groupId>
+                    <artifactId>guava</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>com.google.protobuf</groupId>
+                    <artifactId>protobuf-java</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.kerby</groupId>
+                    <artifactId>kerb-simple-httpserver</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.kerby</groupId>
+                    <artifactId>kerb-core</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.kerby</groupId>
+                    <artifactId>kerb-util</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.kerby</groupId>
+                    <artifactId>kerby-config</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.kerby</groupId>
+                    <artifactId>kerb-crypto</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.kerby</groupId>
+                    <artifactId>kerb-common</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.kerby</groupId>
+                    <artifactId>kerb-client</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <!--
+          对象存储（V4.45 §92）：AWS SDK v2，S3 协议兼容 S3 / 阿里云 OSS / MinIO。
+          url-connection-client 为 JDK 内置 HttpURLConnection 实现的同步 HTTP 客户端，无额外原生依赖、
+          跨平台安全（规避 DuckDB 之类带 linux musl 原生分类器的坑）。编译期直接引用，故为默认（compile）scope。
+        -->
+        <dependency>
+            <groupId>software.amazon.awssdk</groupId>
+            <artifactId>s3</artifactId>
+            <version>${aws-sdk.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>software.amazon.awssdk</groupId>
+            <artifactId>url-connection-client</artifactId>
+            <version>${aws-sdk.version}</version>
+        </dependency>
+
+        <!-- JWT -->
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-api</artifactId>
+            <version>${jjwt.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-impl</artifactId>
+            <version>${jjwt.version}</version>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-jackson</artifactId>
+            <version>${jjwt.version}</version>
+            <scope>runtime</scope>
+        </dependency>
+
+        <!-- SQL 静态解析与安全校验（版本随 MyBatis-Plus 对齐为 4.6；SqlValidator 仅用跨版本通用 API） -->
+        <dependency>
+            <groupId>com.github.jsqlparser</groupId>
+            <artifactId>jsqlparser</artifactId>
+            <version>${jsqlparser.version}</version>
+        </dependency>
+
+        <!-- 测试 -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <finalName>aibi</finalName>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
+
+    <!--
+      T9 驱动插件化：冷数据源驱动不在默认构建里（默认包只带 MySQL 系/PG/SQLite 高频驱动）。
+      两种补齐方式任选：
+        ① 打包期：mvn package -Pdrivers-extended → 六驱动回到 fat jar（历史行为不变）；
+        ② 运行期：把驱动 jar（含其 runtime 依赖）放入 aibi.datasource.driver-dir 插件目录，
+          DriverPluginRegistry 用 URLClassLoader+ServiceLoader 发现、DriverShim 注册进 DriverManager，
+          新增冷门源不再发版。两者都不满足时，建池报“驱动未安装”优雅错误（§90 链路）。
+      注：hive 插件目录形态需同时放入其必要传递依赖 jar（hadoop-common 等已由 Parquet 链路内置，
+      zookeeper/curator 仅 ZK 动态服务发现模式需要，普通 HiveServer2 URL 不需要）。
+    -->
+    <profiles>
+        <profile>
+            <id>drivers-extended</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+            <dependencies>
+                <!-- SQL Server -->
+                <dependency>
+                    <groupId>com.microsoft.sqlserver</groupId>
+                    <artifactId>mssql-jdbc</artifactId>
+                    <scope>runtime</scope>
+                </dependency>
+                <!-- Oracle：显式钉版本（不依赖 Maven Central 的 maven-metadata "release"，避免自动升级漂移） -->
+                <dependency>
+                    <groupId>com.oracle.database.jdbc</groupId>
+                    <artifactId>ojdbc11</artifactId>
+                    <version>21.9.0.0</version>
+                    <scope>runtime</scope>
+                </dependency>
+                <!--
+                  ClickHouse：必须用 shaded classifier，不能用 all。
+                  0.6.5 的 all jar 是上游的坏产物（7.8MB，只含 jdbc/data/config/logging 与 relocate 到
+                  com.clickhouse.client.internal 下的第三方类，缺失 com.clickhouse.client.ClickHouseClient
+                  等核心类），启动期 DriverManager 经 ServiceLoader 初始化该驱动即抛
+                  NoClassDefFoundError: com/clickhouse/client/ClickHouseClient 导致应用起不来。
+                  shaded jar 为同版本自包含 uber jar（含 client/http 传输与 lz4 等），第三方依赖仍 relocate
+                  在 com.clickhouse.client.internal 下，不污染 classpath（其 hc5 引用的 org.slf4j 由 Boot 提供）。
+                -->
+                <dependency>
+                    <groupId>com.clickhouse</groupId>
+                    <artifactId>clickhouse-jdbc</artifactId>
+                    <version>0.6.5</version>
+                    <classifier>shaded</classifier>
+                    <scope>runtime</scope>
+                </dependency>
+                <!--
+                  Hive：仅 JDBC 连接（走 HiveServer2 Thrift），排除 mapreduce/yarn/curator 重传递依赖以收敛
+                  jar 体积与版本冲突；保留 hadoop-common（提供 Configuration/FileSystem，JDBC 内部必需，
+                  默认包的 Parquet 链路已带）。
+                -->
+                <dependency>
+                    <groupId>org.apache.hive</groupId>
+                    <artifactId>hive-jdbc</artifactId>
+                    <version>4.0.0</version>
+                    <scope>runtime</scope>
+                    <exclusions>
+                        <exclusion>
+                            <groupId>org.apache.hadoop</groupId>
+                            <artifactId>hadoop-mapreduce-client-core</artifactId>
+                        </exclusion>
+                        <exclusion>
+                            <groupId>org.apache.hadoop</groupId>
+                            <artifactId>hadoop-mapreduce-client-common</artifactId>
+                        </exclusion>
+                        <exclusion>
+                            <groupId>org.apache.hadoop</groupId>
+                            <artifactId>hadoop-mapreduce-client-jobclient</artifactId>
+                        </exclusion>
+                        <exclusion>
+                            <groupId>org.apache.hadoop</groupId>
+                            <artifactId>hadoop-yarn-api</artifactId>
+                        </exclusion>
+                        <exclusion>
+                            <groupId>org.apache.hadoop</groupId>
+                            <artifactId>hadoop-yarn-common</artifactId>
+                        </exclusion>
+                        <exclusion>
+                            <groupId>org.apache.hadoop</groupId>
+                            <artifactId>hadoop-yarn-client</artifactId>
+                        </exclusion>
+                        <exclusion>
+                            <groupId>org.apache.hadoop</groupId>
+                            <artifactId>hadoop-yarn-server-common</artifactId>
+                        </exclusion>
+                        <exclusion>
+                            <groupId>org.apache.curator</groupId>
+                            <artifactId>curator-client</artifactId>
+                        </exclusion>
+                        <exclusion>
+                            <groupId>org.apache.curator</groupId>
+                            <artifactId>curator-framework</artifactId>
+                        </exclusion>
+                        <exclusion>
+                            <groupId>org.apache.curator</groupId>
+                            <artifactId>curator-recipes</artifactId>
+                        </exclusion>
+                    </exclusions>
+                </dependency>
+                <!-- Trino -->
+                <dependency>
+                    <groupId>io.trino</groupId>
+                    <artifactId>trino-jdbc</artifactId>
+                    <version>450</version>
+                    <scope>runtime</scope>
+                </dependency>
+                <!-- Presto（Facebook 原版，区别于 Trino；驱动类 com.facebook.presto.jdbc.PrestoDriver） -->
+                <dependency>
+                    <groupId>com.facebook.presto</groupId>
+                    <artifactId>presto-jdbc</artifactId>
+                    <version>0.285</version>
+                    <scope>runtime</scope>
+                </dependency>
+            </dependencies>
+        </profile>
+    </profiles>
+</project>

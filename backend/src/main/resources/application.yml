@@ -1,0 +1,261 @@
+server:
+  port: 8080
+  servlet:
+    encoding:
+      charset: UTF-8
+      force: true
+
+spring:
+  application:
+    name: aibi
+  # 主数据源 = 平台元数据库 aibi_meta（租户 / 数据源配置 / 查询历史）。
+  # 用户的业务库不在此处：由 TenantDataSourceManager 按 (租户, 数据源) 动态建只读连接池。
+  # createDatabaseIfNotExist=true 首次连接自动建库；表结构由下面的 sql.init 自动执行。
+  # ★安存治理 T1：连接信息全部经环境变量注入，无真实默认值（本地开发用 backend/local.env，
+  #   由 SecretsGuardEnvironmentPostProcessor 自动加载；缺失时启动快速失败并给中文指引）。
+  datasource:
+    url: ${AIBI_DB_URL:}
+    username: ${AIBI_DB_USERNAME:}
+    password: ${AIBI_DB_PASSWORD:}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 2
+      connection-timeout: 10000
+      # 远端 MySQL / NAT 场景：空闲连接可能被服务端或防火墙回收，导致下个请求拿到陈旧连接而超时。
+      # keepalive-time 定期心跳保活并主动剔除失效连接；max-lifetime 短于服务端 wait_timeout，滚动换新。
+      keepalive-time: 30000
+      max-lifetime: 300000
+      validation-timeout: 5000
+  # 启动时自动执行元数据 DDL（幂等：全部 IF NOT EXISTS）
+  sql:
+    init:
+      mode: always
+      schema-locations: classpath:db/metadata-schema.sql
+  jackson:
+    default-property-inclusion: non_null
+  # 文件上传（问题3：文件类数据源本地上传）大小护栏
+  servlet:
+    multipart:
+      max-file-size: 20MB
+      max-request-size: 20MB
+
+# 应用自定义配置
+aibi:
+  jwt:
+    # ★安存治理 T1：密钥无默认值，必须经 JWT_SECRET 注入（>=32 字节强随机）；缺失/过短启动即失败。
+    # 历史遗留的示例默认值已视同泄露，生产轮换后写入 /opt/aibi/aibi.env
+    secret: ${JWT_SECRET:}
+    expire-minutes: 120
+  # 安存治理校验开关：false 时跳过 SecretsGuard 的必填项检查（仅建议临时排障使用）
+  secrets:
+    validate: ${AIBI_SECRETS_VALIDATE:true}
+  # 平台超级管理员（DataSeeder 首次播种；生产务必用 AIBI_SUPERADMIN_PASSWORD 注入强密码）
+  superadmin:
+    username: ${AIBI_SUPERADMIN_USERNAME:superadmin}
+    password: ${AIBI_SUPERADMIN_PASSWORD:[redacted-default-pwd]}
+  # RBAC 与组织协同（《角色权限体系与组织协同设计》11.3）
+  rbac:
+    # 应急回退开关：false = 只按升级前的二元角色（SUPER_ADMIN/USER）判定，仅用于权限体系故障时保业务可用
+    enabled: true
+    # 会话吊销校验：每请求按 sid 查一次 login_session.revoked_at，使移除成员/停用账号/重置口令 ≤1s 生效。
+    # 关闭后旧令牌可用至自然过期（aibi.jwt.expire-minutes），仅在会话表故障导致全站 401 时临时关闭
+    session-check: true
+    # fail-closed 域清单（由 ApiPermissionRegistry 消费）：这些域的接口若未挂 @RequiresPermission，
+    # 启动日志会以 warn 高亮，把"新加接口忘挂权限点"变成可见的运维指标。与 ApiPermissionRegistry
+    # 的 DEFAULT_FAIL_CLOSED_DOMAINS 一致，在此显式列出使配置成为单一事实源。真正的拒绝由 PermissionAspect
+    # 按注解执行；本清单只负责"漏配可见"。P1 已完成这些域的注解全覆盖（唯一有意例外见 ConfigController.effective）。
+    fail-closed-domains:
+      - /api/admin/**
+      - /api/ops/**
+      - /api/member/**
+      - /api/team/**
+      - /api/org/**
+      - /api/invitation/**
+      - /api/datasource/**
+      - /api/semantic/**
+      - /api/fewshot/**
+      - /api/chart-rule/**
+      - /api/config/**
+    registry:
+      # P6 硬门禁开关：true = fail-closed 域存在未挂 @RequiresPermission 的接口即拒绝启动。
+      # 保持 false：/api/config/effective 是有意放行的基线读端点（所有已认证用户消费展示配置），
+      # 打开硬门禁前需先为它引入显式的"基线放行"标记机制，否则会误拒启动。
+      fail-on-unannotated: false
+    # false = 关闭团队范围收敛，仅保留租户隔离（P2 的数据范围拦截器消费）
+    data-scope-enabled: true
+    # 审计日志异步写入：同步写会让每个敏感操作多一次落库往返
+    audit-async: true
+    invite:
+      # 邀请令牌有效期（天）
+      token-ttl-days: 7
+      # 单条邀请链接可接受的席位数上限
+      max-seats-per-link: 50
+      # 匿名接受邀请（无需先注册）：生产建议保持 false
+      anonymous-accept: false
+  notify:
+    # 兜底渠道：规则选的渠道「尚未接入」或「已接入但不可用」（如邮件没配 SMTP）时回落到此，
+    # 保证告警不会静默消失。取值 LOG / EMAIL。★由 AlertNotifierRouter 真正读取。
+    sender: LOG
+    mail:
+      # 邮件渠道总开关：false 时 EMAIL 视为不可用，规则会回落兜底渠道。
+      # 需要 host + from 都非空才会真正启用（见 EmailAlertNotifier#available）。
+      enabled: ${AIBI_MAIL_ENABLED:false}
+      host: ${AIBI_MAIL_HOST:}
+      port: ${AIBI_MAIL_PORT:465}
+      username: ${AIBI_MAIL_USERNAME:}
+      # 授权码 / 密码。★只经环境变量注入，不写入仓库、不经 API 回显。
+      password: ${AIBI_MAIL_PASSWORD:}
+      # 发件人（一般与 username 相同）；空则取 username。
+      from: ${AIBI_MAIL_FROM:}
+      # 465 端口用 SMTPS（隐式 TLS）：true 走 SSL，false 走 STARTTLS（587 常用）。
+      ssl-enabled: ${AIBI_MAIL_SSL:true}
+      # 连接/读写超时（毫秒）：发信属于预警主链路的一部分，必须限时，不能把扫描线程拖死。
+      timeout-ms: ${AIBI_MAIL_TIMEOUT_MS:8000}
+  llm:
+    # 主力模型：DeepSeek（OpenAI 兼容协议）；★安存治理 T1：key 无默认值，经 DEEPSEEK_API_KEY 注入
+    base-url: ${DEEPSEEK_BASE_URL:https://api.deepseek.com}
+    api-key: ${DEEPSEEK_API_KEY:}
+    model: ${DEEPSEEK_MODEL:deepseek-chat}
+    timeout-seconds: 30
+    # 后台异步 AI 任务（全库别名补全 / AI 大屏编排）的"长思考"覆盖参数。
+    # 交互问数走模型行上的快速配置（extra_body 常关思考 + 小 max_tokens，保低延迟）；
+    # 异步任务不受延迟约束，这里覆盖为开启思考并放宽 max_tokens——思考 token 也计入 max_tokens，
+    # 沿用行上的小值会把答案挤掉。extra-body 留空表示不覆盖。
+    long-thinking:
+      extra-body: '{"thinking":{"type":"enabled"}}'
+      max-tokens: 4000
+    # 降级备选：通义千问（DashScope OpenAI 兼容模式）。未配 api-key 时 LlmRouter 自动跳过，
+    # 因此只配 DeepSeek 也能运行；两者都配即获得跨供应商容灾（主力失败自动切备选）。
+    fallback:
+      base-url: ${QWEN_BASE_URL:https://dashscope.aliyuncs.com/compatible-mode/v1}
+      api-key: ${QWEN_API_KEY:}
+      model: ${QWEN_MODEL:qwen-plus}
+      timeout-seconds: 30
+  # 流式问数（SSE）
+  chat:
+    # SSE 连接超时（毫秒）。单次问数含多次 LLM 调用（自一致性多路 / 交叉一致性 / AI 解读·校验·选图），
+    # 实测可达数分钟；过小会在结果产出前被 Spring 强制 complete，前端永远拿不到 result 事件
+    # （表现为"问数非常慢且最后什么都没有"）。默认 10 分钟。
+    sse-timeout-ms: 600000
+  query:
+    timeout-seconds: 30
+    max-rows: 10000
+    # 全局并发护栏（M9）：同时执行的问数（LLM+DB）上限，保护 4C4G 单机；超出快速失败并提示稍后重试
+    max-concurrent: 5
+    # 获取并发许可的最长等待（毫秒），超时即拒绝（TOO_MANY_REQUESTS）
+    acquire-timeout-ms: 3000
+  # NL2SQL 核心引擎（架构文档 §3.6）参数
+  nl2sql:
+    # 少样本注入条数：从 query_history 中 status=OK 的历史问答取最相似样本
+    few-shot-limit: 3
+    # SQL 执行报错后回喂 LLM 自动修正的最大重试次数
+    max-repair: 2
+    # 多轮对话：注入 Prompt 的最近历史轮数（同一 conversationId 下）
+    conversation-turns: 3
+  # 对话页推荐问题（问题4）：依数据源 schema 由 LLM 智能生成，带进程内缓存与逐级降级兜底
+  suggestion:
+    # 生成的推荐问题条数
+    count: 6
+    # 进程内缓存 TTL（秒），0 表示不缓存；生产版平替 Redis
+    cache-ttl-seconds: 1800
+    # 注入 Prompt 的最大表数（控制提示词长度）
+    max-tables: 20
+  # 统一配置中心（sys_config）读取
+  config:
+    # 进程内缓存 TTL（秒）。0（默认）= 不缓存 → sys_config 改动立即可见。
+    # 本服务可能被多个 JVM（本地联调与生产共用 aibi_meta）或库外途径改动，而写操作只能失效
+    # "本实例"缓存；沿用长 TTL 会出现"平台侧已改、租户侧仍旧值"的不一致。故默认关闭缓存，
+    # 确有性能需要再显式调大（代价是跨实例可能滞后）。
+    cache-ttl-seconds: 0
+  # 对外 MCP（Model Context Protocol，见 docs/04-analysis/对外MCP能力方案.md）
+  mcp:
+    # 总开关：false 时 /mcp 直接不可用，便于未接入前彻底关闭入口
+    enabled: ${AIBI_MCP_ENABLED:true}
+    # 本服务的规范 URI（RFC 8707 resource）：Bearer 令牌的 aud 必须包含它，
+    # 防止"给 A 服务签的令牌被拿来调 B 服务"的混淆代理攻击。生产请设为对外可访问的绝对地址。
+    resource-url: ${AIBI_MCP_RESOURCE_URL:http://localhost:8080/mcp}
+    # 授权服务器元数据地址（RFC 8414），逗号分隔；一期 PAT 闭环时不参与校验，仅用于 well-known 应答
+    authorization-servers: ${AIBI_MCP_AUTH_SERVERS:}
+    # Bearer JWT 走 JWKS 校验时的地址（Keycloak / Auth0 等）。留空表示只接受本系统自签 JWT（HS256）。
+    jwks-url: ${AIBI_MCP_JWKS_URL:}
+    # 期望的签发者（iss）；留空表示不校验 iss
+    issuer: ${AIBI_MCP_ISSUER:}
+    # 是否强制校验 audience：true 时 Bearer JWT 必须含 aud 且命中 resource-url。
+    # 本系统自签 JWT（无 aud 声明）由 allow-self-jwt 单独放行，不受此项影响。
+    require-audience: ${AIBI_MCP_REQUIRE_AUDIENCE:true}
+    # 是否接受本系统登录 JWT 作为 MCP 凭据（复用既有身份，便于内部联调）
+    allow-self-jwt: ${AIBI_MCP_ALLOW_SELF_JWT:true}
+    # 限流（次/分钟）：MCP 的调用方是 Agent 而非人，循环调用极易打满 QPS，必须单独限流
+    rate-limit-per-user: ${AIBI_MCP_RL_USER:30}
+    rate-limit-per-tenant: ${AIBI_MCP_RL_TENANT:120}
+  schema:
+    # 元数据（表结构）缓存 TTL（秒），0 表示不缓存；生产版平替 Redis（§3.8）
+    cache-ttl-seconds: 1800
+  # 配额兜底默认（M6 + 超管配额）：实际以 tenant.daily_limit/total_limit 为准（超管可按租户配置）；
+  # 下列值仅在建租户未显式设置时按套餐兜底。计数已改为 DB 持久化（quota_usage + tenant.total_used）。
+  quota:
+    # 免费版每日问数兜底上限
+    free-daily: 20
+    # 专业版每日兜底上限；-1 表示不限制（企业版恒定不限制）
+    pro-daily: 1000
+  # 分享链接（M7）：结果快照 + 公开访问
+  share:
+    # 快照最多保留的结果行数（超出截断），控制 MEDIUMTEXT 体积
+    snapshot-max-rows: 500
+    # 公开访问页的基础地址（前端站点），用于拼出可分享 url；留空则返回相对路径 /share/{token}
+    public-base-url: ${AIBI_SHARE_BASE_URL:}
+  datasource:
+    # ★安存治理 T1：数据源凭证 AES-GCM 主密钥无默认值，必须经 AIBI_CIPHER_KEY 注入且与库分离。
+    # 注意：轮换此密钥前必须先完成存量密文双 key 重加密（见重构任务清单 T1 步骤 3），否则所有数据源连不上。
+    cipher-key: ${AIBI_CIPHER_KEY:}
+    # ★安存治理 T1（步骤 3）：cipher-key 双 key 重加密迁移的一次性维护开关，正常保持缺省 false（Bean 不注册，启动零影响）。
+    #   启用流程：AIBI_CIPHER_KEY 仍填【旧】密钥 + AIBI_CIPHER_KEY_NEW 填【新】密钥 + AIBI_CIPHER_MIGRATE=true 启动
+    #   → CipherMigrationRunner 重加密 data_source/llm_config 两列密文 → 核验数据源可连后去掉 NEW/开关、
+    #   把 AIBI_CIPHER_KEY 改为新值再重启。
+    cipher-key-new: ${AIBI_CIPHER_KEY_NEW:}
+    cipher-migrate: ${AIBI_CIPHER_MIGRATE:false}
+    # T9 驱动插件化：冷驱动（SQL Server/Oracle/ClickHouse/Hive/Trino/Presto）不在默认包内；
+    # 指定目录后可放驱动 jar（含必要传递依赖），启动后首次使用时扫描加载（URLClassLoader+DriverShim）；
+    # 留空或未放 → 建冷源时报「驱动未安装」优雅错误。高频驱动（MySQL/PG/SQLite）始终内置。
+    driver-dir: ${AIBI_DRIVER_DIR:}
+    pool:
+      # 每个 (租户, 数据源) 连接池的最大连接数；4GB 内存下宜小
+      max-size: 3
+  # 文件类数据源本地上传（问题3）：本地磁盘存储 + 大小/类型限制 + 预览行数
+  upload:
+    # 上传根目录（容器内建议挂 VOLUME 持久化）；按租户分子目录、uuid 重命名，杜绝路径穿越
+    dir: ${AIBI_UPLOAD_DIR:./data/uploads}
+    max-size-mb: 20
+    preview-rows: 20
+    allowed-extensions: csv,xlsx,xls
+  # 大屏背景素材（范围 B）：图片类本地上传，返回可经免认证公开端点访问的 URL（供大屏背景 url() 引用）
+  materials:
+    # 素材根目录（扁平存储 uuid.扩展名，不可猜）；公开访问 `/api/public/materials/{file}` 已在 SecurityConfig 放行
+    dir: ${AIBI_MATERIALS_DIR:./data/materials}
+    max-size-mb: 5
+  # 演示数据（DataSeeder 播种）：登录 admin/[see-startup-log] → 租户 1 → 数据源 1（指向演示业务库 aibi_demo_sales）
+  # 说明：仅在 data_source 无 id=1 记录时才播种（空库引导）；正常演示数据由 t3 播种脚本经 API 建 10 个数据源占据 id=1..10，DataSeeder 会自动跳过。
+  demo:
+    tenant-id: 1
+    plan: PRO
+    datasource-id: 1
+    name: ${AIBI_DEMO_DS_NAME:电商销售库}
+    type: MYSQL
+    host: ${AIBI_DEMO_HOST:127.0.0.1}
+    port: ${AIBI_DEMO_PORT:3306}
+    database: ${AIBI_DEMO_DATABASE:aibi_demo_sales}
+    username: ${AIBI_DEMO_USERNAME:root}
+    password: ${AIBI_DEMO_PASSWORD:root}
+    jdbc-params: "useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&characterEncoding=utf8"
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
+logging:
+  level:
+    com.aibi: DEBUG
+    org.springframework.jdbc.core.JdbcTemplate: DEBUG

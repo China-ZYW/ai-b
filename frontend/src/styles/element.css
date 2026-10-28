@@ -1,0 +1,133 @@
+/* ==========================================================================
+   Element Plus 主题覆写：让组件贴合克莱因蓝 + 渐变主视觉
+   （在 element-plus 样式之后引入，确保覆盖优先级）
+   ========================================================================== */
+
+/* ---------- 主按钮：克莱因蓝渐变 ---------- */
+.el-button--primary {
+  --el-button-bg-color: var(--ikb);
+  --el-button-border-color: var(--ikb);
+  background: var(--grad-btn);
+  border: none;
+  font-weight: 600;
+  letter-spacing: 0.2px;
+  box-shadow: 0 4px 14px rgba(var(--brand-rgb), 0.24);
+  transition: filter 0.2s ease, box-shadow 0.2s ease, transform 0.12s ease;
+}
+.el-button--primary:hover,
+.el-button--primary:focus {
+  background: var(--grad-btn-hover);
+  border: none;
+  box-shadow: 0 6px 20px rgba(var(--brand-rgb), 0.34);
+  filter: saturate(1.05);
+}
+.el-button--primary:active {
+  transform: translateY(1px);
+  box-shadow: 0 3px 10px rgba(var(--brand-rgb), 0.28);
+}
+.el-button--primary.is-plain {
+  background: var(--ikb-pale);
+  border: 1px solid rgba(var(--brand-rgb), 0.3);
+  color: var(--ikb);
+  box-shadow: none;
+}
+.el-button--primary.is-plain:hover {
+  background: var(--ikb);
+  color: #fff;
+  border-color: var(--ikb);
+}
+.el-button--primary.is-link,
+.el-button--primary.is-text {
+  background: transparent;
+  box-shadow: none;
+  color: var(--ikb);
+}
+
+/* 大号登录按钮更饱满 */
+.el-button--large {
+  --el-button-size: 44px;
+  border-radius: var(--radius-md);
+}
+
+/* ---------- 卡片 ---------- */
+.el-card {
+  --el-card-border-radius: var(--radius-lg);
+  border: 1px solid var(--border-light);
+  box-shadow: var(--shadow-sm) !important;
+}
+
+/* ---------- 输入框聚焦：克莱因蓝描边 ---------- */
+.el-input__wrapper.is-focus,
+.el-textarea__inner:focus {
+  box-shadow: 0 0 0 1px var(--ikb) inset !important;
+}
+.el-input__wrapper:hover,
+.el-textarea__inner:hover {
+  box-shadow: 0 0 0 1px rgba(var(--brand-rgb), 0.4) inset;
+}
+
+/* ---------- 菜单（侧栏为深色渐变，用自定义类；此处处理浅色菜单） ---------- */
+.el-menu {
+  border-right: none;
+}
+
+/* ---------- 标签 / Tag ---------- */
+.el-tag {
+  border-radius: 999px;
+  font-weight: 500;
+}
+
+/* ---------- 表格表头 ---------- */
+.el-table th.el-table__cell {
+  background: var(--ikb-ghost) !important;
+  color: var(--text-regular);
+  font-weight: 600;
+}
+.el-table {
+  --el-table-border-color: var(--border-light);
+  --el-table-header-bg-color: var(--ikb-ghost);
+}
+.el-table__row:hover > td.el-table__cell {
+  background: var(--ikb-ghost) !important;
+}
+
+/* ---------- 分页当前页 ---------- */
+.el-pagination.is-background .el-pager li.is-active {
+  background: var(--grad-btn);
+}
+
+/* ---------- 进度条 ---------- */
+.el-progress-bar__inner {
+  background: var(--grad-accent);
+}
+
+/* ---------- 加载遮罩文字 ---------- */
+.el-loading-spinner .path {
+  stroke: var(--ikb);
+}
+
+/* ---------- 消息提示圆角 ---------- */
+.el-message {
+  border-radius: var(--radius-md);
+  min-width: 260px;
+}
+
+/* ---------- 对话框 ---------- */
+.el-dialog {
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+.el-dialog__header {
+  margin-right: 0;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border-light);
+}
+.el-dialog__title {
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+/* ---------- 空状态文字 ---------- */
+.el-empty__description p {
+  color: var(--text-secondary);
+}

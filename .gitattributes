@@ -1,0 +1,4 @@
+# 行尾规范：保证跨平台可执行
+# Shell 脚本必须保持 LF —— core.autocrlf=true 在 Windows 检出会转 CRLF，
+# 导致 Git Bash / Linux bash 因 shebang 与行尾 \r 报 "bad interpreter / $'\r'" 类错误。
+*.sh text eol=lf

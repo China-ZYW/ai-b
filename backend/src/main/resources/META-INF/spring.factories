@@ -1,0 +1,4 @@
+# Spring Boot 3 的 EnvironmentPostProcessor 仍通过 spring.factories 注册
+# （AutoConfiguration.imports 只适用于自动配置类，不适用于 EPP）
+org.springframework.boot.env.EnvironmentPostProcessor=\
+com.aibi.common.config.SecretsGuardEnvironmentPostProcessor
