@@ -1,0 +1,94 @@
+# =============================================================================
+# aibi · docker-compose（一键起 MySQL + backend + frontend）
+#
+# 使用前置：
+#   1) 复制 backend/local.env.example → backend/local.env，填好
+#      JWT_SECRET / AIBI_CIPHER_KEY / DEEPSEEK_API_KEY / AIBI_SUPERADMIN_PASSWORD
+#      （DB 三项由本 compose 注入，无需在 local.env 里填）
+#   2) 首次构建后端 jar：
+#        cd backend && mvn -B -DskipTests package
+#   3) 根目录执行：
+#        docker compose up -d
+#      访问 http://localhost/  （前端 nginx 反代 /api /mcp /.well-known → backend:8080）
+#
+# 生产部署：请自行加 TLS 终结层（Caddy/Nginx/云 LB），并把 MySQL 换成外部托管。
+# =============================================================================
+
+name: aibi
+
+services:
+
+  # ---------- 平台元数据库 ----------
+  mysql:
+    image: mysql:8.0
+    container_name: aibi-mysql
+    restart: unless-stopped
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+      - --default-time-zone=+08:00
+    environment:
+      MYSQL_ROOT_PASSWORD: ${AIBI_DB_ROOT_PASSWORD:-aibi_root_pw_change_me}
+      MYSQL_DATABASE: aibi_meta
+      MYSQL_USER: ${AIBI_DB_USERNAME:-aibi}
+      MYSQL_PASSWORD: ${AIBI_DB_PASSWORD:-aibi_meta_pw_change_me}
+    ports:
+      - "${AIBI_DB_PORT:-3306}:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-p${AIBI_DB_ROOT_PASSWORD:-aibi_root_pw_change_me}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    networks: [aibi-net]
+
+  # ---------- Spring Boot 后端 ----------
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    image: aibi-backend:local
+    container_name: aibi-backend
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+    # 敏感凭据（JWT_SECRET / AIBI_CIPHER_KEY / DEEPSEEK_API_KEY 等）走 env_file
+    env_file:
+      - path: backend/local.env
+        required: false        # 首次启动可暂缺，容器内会给出中文提示
+    environment:
+      # 覆盖元数据库连接，指向 compose 内的 mysql 服务
+      AIBI_DB_URL: jdbc:mysql://mysql:3306/aibi_meta?createDatabaseIfNotExist=true&useSSL=false&serverTimezone=Asia/Shanghai&characterEncoding=utf8&allowPublicKeyRetrieval=true
+      AIBI_DB_USERNAME: ${AIBI_DB_USERNAME:-aibi}
+      AIBI_DB_PASSWORD: ${AIBI_DB_PASSWORD:-aibi_meta_pw_change_me}
+      TZ: Asia/Shanghai
+    ports:
+      - "${AIBI_BACKEND_PORT:-8080}:8080"
+    volumes:
+      - backend-uploads:/var/lib/aibi/uploads
+    networks: [aibi-net]
+
+  # ---------- Vue3 前端（nginx 静态 + 反代 /api /mcp /.well-known）----------
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    image: aibi-frontend:local
+    container_name: aibi-frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "${AIBI_FRONTEND_PORT:-80}:80"
+    networks: [aibi-net]
+
+volumes:
+  mysql-data:
+  backend-uploads:
+
+networks:
+  aibi-net:
+    driver: bridge

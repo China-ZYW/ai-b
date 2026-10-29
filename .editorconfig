@@ -1,0 +1,43 @@
+# EditorConfig: https://editorconfig.org
+# 统一跨编辑器 / 跨 OS 的换行、缩进、编码；防止再出现 GBK/UTF-8 混合的文件名 mojibake
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+indent_style = space
+indent_size = 2
+
+# Windows 专用脚本必须 UTF-8 with BOM（PowerShell 5.1 无 BOM 遇中文报 ParserError）
+[*.ps1]
+end_of_line = crlf
+charset = utf-8-bom
+
+[*.bat]
+end_of_line = crlf
+
+[*.cmd]
+end_of_line = crlf
+
+# Java：4 空格缩进
+[*.java]
+indent_size = 4
+
+# SQL / YAML / Properties：保持文件既有风格
+[*.{sql,yml,yaml,properties}]
+indent_size = 2
+
+# Markdown：保留 trailing 空格（双空格 = 换行）
+[*.md]
+trim_trailing_whitespace = false
+max_line_length = off
+
+# 脚本与 Makefile：tab
+[{Makefile,*.mk}]
+indent_style = tab
+
+# Git commit message
+[.git/COMMIT_EDITMSG]
+max_line_length = 72

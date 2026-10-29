@@ -1,81 +1,135 @@
-# 依赖
-node_modules/
-frontend/node_modules/
+# =============================================================================
+# aibi .gitignore
+# 关键教训（T6 仓库卫生）：项目习惯用 `git add -A`，所以"未跟踪但未忽略"
+# 的目录 = 潜在泄露。新增本地工具/凭据/日志目录时，**先加忽略再落盘**。
+# 规则只对未跟踪文件生效；已 tracked 的文件需 `git rm --cached <path>` 才出库。
+# =============================================================================
 
-# ★安存治理 T1：本地凭据文件绝不入库（模板见 backend/local.env.example）
+# ─── 凭据与环境变量（严格禁止入库）─────────────────────────────
+# 本地开发凭据（由 backend/local.env.example 复制生成）
 local.env
 *.local.env
 .env
+.env.*
+!.env.example
+!local.env.example
+*keys.env
+*_secrets.env
 
-# ★技术债 T6：日志/临时输出/崩溃转储/探针目录
-*_out.txt
+# ─── 构建产物 ────────────────────────────────────────────────
+# Java / Maven
+target/
+*.jar
+*.war
+*.class
+!gradle/wrapper/gradle-wrapper.jar
+!**/src/main/**/target/
+
+# Node / Vite
+node_modules/
+dist/
+dist-ssr/
+.vite/
+*.local
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.pnpm-store/
+
+# ─── 日志与运行产物 ──────────────────────────────────────────
+*.log
+logs/
+run.log
+run.err.log
 hs_err_pid*
 replay_pid*
-.probe/
-**/_archive/
+*.out
+*_out.txt
+mvn_*.txt
+prod_*
+stats.txt
+smoke-result.tsv
+scripts/smoke-result.tsv
+
+# ─── 上传/落盘数据（默认相对路径 ./data 会随启动 cwd 漂移）─────
 /data/uploads/
 /data/materials/
-# 从 backend/ 目录启动时 aibi.upload.dir 默认 ./data/uploads 会解析到仓内（历史已有一批 tracked 上传件），
-# 此处先堵住后续入库；默认值改为仓库外固定路径需运维侧先确认 AIBI_UPLOAD_DIR（T6 挂账）
 backend/data/
 
-# ★T6 收尾：bench/ 是 NL2SQL 本地评测工具集，其 llm_keys.env 存有真实 LLM API Key（provider|base_url|model|key），
-#   整目录不入库；*keys.env 为全局兜底，防今后任何密钥文件被意外提交
-backend/bench/
-*keys.env
+# ─── IDE / 编辑器 ────────────────────────────────────────────
+.idea/
+*.iml
+*.iws
+.vscode/
+!.vscode/extensions.json
+!.vscode/settings.sample.json
+.settings/
+.project
+.classpath
+.factorypath
+*.swp
+*.swo
+*~
 
-# ★T6 收尾：构建命令输出与从生产抓下来的调试产物（均为一次性输出，零引用已实证）
-backend/mvn_*.txt
-backend/prod_*
-backend/verify_*.out
-backend/*.out
-scripts/smoke-result.tsv
-stats.txt
+# ─── 操作系统 ────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+Desktop.ini
+$RECYCLE.BIN/
 
-# ★T5 收尾：本地 CI 门禁（scripts/ci_check.ps1）的生成工件目录（写守卫审计报告等），不入库
+# ─── 探针/临时目录 ───────────────────────────────────────────
+.probe/
+**/_archive/
+backend/_*.py
+backend/_*.txt
+
+# ─── 测试与覆盖率 ────────────────────────────────────────────
+coverage/
+.nyc_output/
+*.gcov
+*.profdefault
+jest-results.xml
+test-results/
+**/test-output/
+
+# ─── Docker 卷与本地开发缓存 ────────────────────────────────
+docker-data/
+pgdata/
+mysqldata/
+
+# ─── 包管理器缓存 ────────────────────────────────────────────
+.pnp
+.pnp.js
+.eslintcache
+.stylelintcache
+
+# ─── Python 缓存（demo/ 下预置数据生成脚本）────────────────
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+
+# ─── 服务运行态 PID（init 脚本后台启动记录）───────────────
+*.pid
+
+# ─── CI 本地门禁的生成产物（写守卫审计报告等）────────────
 .ci-artifacts/
 
-# 构建产物（★没有这段会把 target/*.class 与 dist 提交进仓库）
-backend/target/
-frontend/dist/
+# ─── 回滚备份产物（npm build 重命名旧 dist / jar 部署备份）────
 frontend/dist_old_*/
-# 构建前把旧 dist 改名留下的临时备份（npm run build 前的 rename 兜底）——不是源码，勿提交
 frontend/dist_bak_*/
-target/
-dist/
+*.jar.bak.*
+*.bak.*
 
-# 日志与构建输出
-*.log
+# ─── backend 一次性日志与输出───────────────────────────
 backend/mvn_*.log
 backend/*.log
 frontend/*.log
-# init 脚本后台启动记录的服务 PID（运行态产物，勿入库）
-*.pid
-
-# 临时调试脚本 / 一次性输出
-backend/_*.py
-backend/_*.txt
+backend/verify_*.out
 backend/zz_*.txt
 _checklog.py
 _ls.txt
 
-# IDE / 编辑器
-.idea/
-.vscode/
-*.iml
-*.swp
-
-# 系统文件
-.DS_Store
-Thumbs.db
-
-# 运行期回滚备份
-*.jar.bak.*
-*.bak.*
-
-# 工作区数据（MEMORY / 记忆，非源码，勿提交）
-.workbuddy/
-
-# Python 缓存
-__pycache__/
-*.pyc

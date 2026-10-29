@@ -1,0 +1,97 @@
+name: "🐞 Bug 反馈 / Bug Report"
+description: "报告一个可复现的问题"
+title: "[bug] "
+labels: ["bug", "triage"]
+assignees: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        感谢反馈。提交前请先[搜索已有 Issue](../issues?q=is%3Aissue)，避免重复。
+        安全类问题请走 [SECURITY.md](../../SECURITY.md)，**不要**在这里公开贴出。
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: 问题描述 / What happened
+      description: 简明说明现象与预期行为的差异
+      placeholder: 点击「保存数据源」后前端提示成功，但刷新页面后配置丢失。
+    validations: { required: true }
+
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: 复现步骤 / Steps to reproduce
+      description: 越具体越好；若能提供最小复现样例更佳
+      placeholder: |
+        1. 登录 superadmin
+        2. 数据源 → 新建 → 选择 MySQL
+        3. 填写连接信息 → 保存
+        4. 刷新列表 → 记录不存在
+    validations: { required: true }
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: 期望行为 / Expected behavior
+      placeholder: 列表应立即出现新数据源，且后端返回 200。
+    validations: { required: true }
+
+  - type: dropdown
+    id: module
+    attributes:
+      label: 涉及模块 / Module
+      multiple: true
+      options:
+        - 认证/租户 (auth/tenant)
+        - 数据源 (datasource)
+        - NL2SQL 问数 (chat/nl2sql)
+        - 指标与大屏 (metrics/chart)
+        - 定时报表 (schedule)
+        - 分享与嵌入 (share/embed)
+        - MCP 服务 (mcp)
+        - 前端 UI (frontend)
+        - 部署/构建 (deploy/build)
+        - 文档 (docs)
+        - 其它 (other)
+    validations: { required: true }
+
+  - type: input
+    id: version
+    attributes:
+      label: 版本 / Version
+      description: git commit hash / docker image tag / CHANGELOG 段落
+      placeholder: "v0.1.0 或 commit 1a2b3c4"
+    validations: { required: true }
+
+  - type: textarea
+    id: env
+    attributes:
+      label: 运行环境 / Environment
+      description: OS / JDK / Node / MySQL / 部署形态（本地、compose、k8s）
+      placeholder: |
+        - OS: Windows 11 26H2 / Ubuntu 22.04
+        - JDK: 17.0.10 (Temurin)
+        - Node: 20.11
+        - MySQL: 8.0.36
+        - 部署: docker compose
+    validations: { required: true }
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: 相关日志 / Logs
+      description: |
+        后端 backend/logs/ 或 docker compose logs backend；前端浏览器 DevTools Console/Network。
+        **请对以下字段脱敏后再粘贴**：手机号、邮箱、API Key、JWT、数据源密码、内网 IP。
+      render: shell
+    validations: { required: false }
+
+  - type: checkboxes
+    id: confirmations
+    attributes:
+      label: 提交前确认 / Pre-submission checklist
+      options:
+        - { label: "已搜索过相似 Issue，未找到完全匹配的", required: true }
+        - { label: "已按 SECURITY.md 检查，确认不是安全漏洞", required: true }
+        - { label: "日志与截图中的敏感信息已脱敏", required: true }
