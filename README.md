@@ -67,6 +67,14 @@ bash scripts/init.sh
 
 ### 手动启动
 
+**0) 用 Docker 一键起（可选）**：填好 `backend/local.env` 后：
+
+```bash
+cd backend && mvn -B -DskipTests package && cd ..
+docker compose up -d
+# 访问 http://localhost/
+```
+
 **1) 配置凭据**：复制 `backend/local.env.example` 为 `backend/local.env`，填写以下环境变量（均无真实默认值，缺失时启动会快速失败并给出中文指引）：
 
 ```
@@ -104,14 +112,22 @@ npm run dev
 
 ## 📖 文档
 
-- [产品定位](docs/01-product/) · [架构设计](docs/02-architecture/)（前后端架构 / 多租户与数据源接入 / 角色权限与组织协同）
-- [学习指南](docs/06-learning/)
-- 详见 [docs 索引](docs/README.md)
+- [文档索引](docs/README.md)
+- 产品定位：[docs/01-product/](docs/01-product/)
+- 架构设计：[docs/02-architecture/](docs/02-architecture/)（前后端架构 / 多租户与数据源接入 / 角色权限与组织协同）
+- 专题方案：[docs/04-analysis/对外MCP能力方案.md](docs/04-analysis/对外MCP能力方案.md)
+- 运维交付：[docs/05-operations/本地启动与联调.md](docs/05-operations/本地启动与联调.md) · [docs/05-operations/用户操作手册.md](docs/05-operations/用户操作手册.md)
+- 学习指南：[docs/06-learning/](docs/06-learning/)
 
 ## 🤝 贡献
 
-欢迎提交 Issue 与 Pull Request。提交前请确保：后端 `mvn -B test` 通过，前端 `npm run build`（含 `vue-tsc` 类型检查）通过。
+欢迎提交 Issue 与 Pull Request。请先阅读 [CONTRIBUTING.md](CONTRIBUTING.md) 与 [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)。
+提交前本地自检：后端 `mvn -B test` 通过，前端 `npm run build`（含 `vue-tsc` 类型检查）通过。
+
+## 🔐 安全与漏洞披露
+
+发现安全问题请通过 [SECURITY.md](SECURITY.md) 描述的私密渠道报告，**不要**开公开 Issue。
 
 ## 📄 许可
 
-本项目基于 [Apache License 2.0](LICENSE) 开源。
+本项目基于 [Apache License 2.0](LICENSE) 开源。变更历史见 [CHANGELOG.md](CHANGELOG.md)。
