@@ -21,11 +21,13 @@ from envutil import secret  # noqa: E402
 
 BASE = os.environ.get("AIBI_BASE_URL", "http://localhost:8080").rstrip("/")
 
-# 演示账号：DataSeeder 播种的公开默认值（见运维文档"默认账号"表），非敏感凭据
+# 演示账号口令：开源仓不预置任何硬编码默认口令。
+# 部署者从首次启动日志 WARN 行取随机口令，或先在 backend/local.env 写入固定口令；
+# 环境变量优先级：AIBI_SUPERADMIN_PASSWORD / AIBI_DEMO_ADMIN_PASSWORD > E2E_DEMO_PASSWORD。
 SUPERADMIN_USER = secret("AIBI_SUPERADMIN_USERNAME", "superadmin")
-SUPERADMIN_PW = secret("AIBI_SUPERADMIN_PASSWORD", "[redacted-default-pwd]")
+SUPERADMIN_PW = secret("AIBI_SUPERADMIN_PASSWORD", "") or os.environ.get("E2E_SUPERADMIN_PASSWORD", "")
 DEMO_USER = os.environ.get("E2E_DEMO_USERNAME", "admin")
-DEMO_PW = os.environ.get("E2E_DEMO_PASSWORD", "")
+DEMO_PW = os.environ.get("E2E_DEMO_PASSWORD") or secret("AIBI_DEMO_ADMIN_PASSWORD", "")
 
 
 class SkipTest(Exception):

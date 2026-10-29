@@ -55,7 +55,9 @@ npm run preview      # 预览已构建产物
 后端需要 **MySQL**（元数据库 `aibi_meta`，首次连接自动建库 + 执行 DDL + 播种演示账号）。详见 [`../backend/README.md`](../backend/README.md)。启动后即可用演示账号登录：
 
 ```
-用户名 admin / 密码 [见启动日志]  →  租户 1  →  演示数据源「演示电商库」
+用户名 admin / 密码 → 从启动后台 WARN 日志里取（开源仓不预置硬编码默认口令；
+                          也可先在 backend/local.env 里设 AIBI_DEMO_ADMIN_PASSWORD 固定）
+                          →  租户 1  →  演示数据源「演示电商库」
 ```
 
 > 说明：Redis 非必需（配额/Schema 缓存为内存实现）；LLM Key 缺省时问数生成会失败（设置 `DEEPSEEK_API_KEY` 后即可跑通完整 NL2SQL：意图识别→生成 SQL→执行→图表推荐），但登录、数据源、历史、收藏、分享等接口不受影响。

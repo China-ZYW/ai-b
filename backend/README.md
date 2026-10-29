@@ -123,7 +123,7 @@ mvn spring-boot:run
 
 启动时自动完成：`createDatabaseIfNotExist` 建 `aibi_meta` → `spring.sql.init` 建元数据表 →
 `SchemaMigration` 对**存量库**幂等补列（`tenant` 配额/期限、`app_user.role` 等）→ `DataSeeder` 播种演示租户（id=1, PRO）、
-演示数据源（id=1 → aibi_demo）、**首个超管**（`superadmin`，口令取 `AIBI_SUPERADMIN_PASSWORD`、默认 `[redacted-default-pwd]`）、
+演示数据源（id=1 → aibi_demo）、**首个超管**（`superadmin`，口令取 `AIBI_SUPERADMIN_PASSWORD`；**开源仓不预置默认口令**，留空时会用 SecureRandom 随机生成并以 WARN 日志一次性打印）、
 全局默认 LLM 配置与 4 套内置驾驶舱模板。服务监听 `http://localhost:8080`。
 
 ## REST API 一览
@@ -164,12 +164,13 @@ mvn spring-boot:run
 
 ## 接口联调
 
-**① 注册 / 登录获取 token**（演示账号 admin / [see-startup-log]，签发含 `tid=1`、`plan=PRO` 的 JWT；超管 `superadmin` / `[redacted-default-pwd]` 签发 `role=SUPER_ADMIN`、`tid=0`，可访问 `/api/admin/**`）
+**① 注册 / 登录获取 token**（演示账号 `admin` / `superadmin` 的口令均来自首次启动日志中 WARN 行随机生成的值，或在 `backend/local.env` 中预设的 `AIBI_DEMO_ADMIN_PASSWORD` / `AIBI_SUPERADMIN_PASSWORD`；**开源仓不预置任何硬编码默认口令**。签发后 admin 的 JWT 含 `tid=1`、`plan=PRO`；超管 `role=SUPER_ADMIN`、`tid=0`，可访问 `/api/admin/**`）
 
 ```bash
+# 先把启动日志里的随机口令（或 local.env 中预设的 AIBI_DEMO_ADMIN_PASSWORD）导出为环境变量
 curl -X POST http://localhost:8080/api/auth/login \
   -H "Content-Type: application/json" \
-  -d '{"username":"admin","password":"[set-via-env]"}'
+  -d "{\"username\":\"admin\",\"password\":\"$AIBI_DEMO_ADMIN_PASSWORD\"}"
 ```
 
 **② 携带 token 问数**（请求体带 `datasourceId`；`conversationId` 可选，追问时回传以启用多轮）

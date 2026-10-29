@@ -118,7 +118,7 @@ npm install
 npm run dev
 ```
 
-默认开发登录口令见 `application.yml`（`superadmin` / `admin` 使用内置默认，生产务必经环境变量覆盖）。
+默认开发登录口令：**开源仓不预置任何硬编码默认值**。首次启动时 `TenantSeeder` 会读 `AIBI_SUPERADMIN_PASSWORD` / `AIBI_DEMO_ADMIN_PASSWORD`，如未设置则随机生成并以 **WARN** 日志一次性打印，请妥善保存并登录后立即修改。详见 [本地启动与联调](docs/05-operations/本地启动与联调.md#首次播种账号与口令)。
 
 ## 🔒 安全说明
 

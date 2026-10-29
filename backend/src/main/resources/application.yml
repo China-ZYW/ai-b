@@ -50,10 +50,13 @@ aibi:
   # 安存治理校验开关：false 时跳过 SecretsGuard 的必填项检查（仅建议临时排障使用）
   secrets:
     validate: ${AIBI_SECRETS_VALIDATE:true}
-  # 平台超级管理员（DataSeeder 首次播种；生产务必用 AIBI_SUPERADMIN_PASSWORD 注入强密码）
+  # 平台超级管理员（DataSeeder 首次播种）。
+  # ★ 开源仓不预置任何真实口令：未注入 AIBI_SUPERADMIN_PASSWORD 时 TenantSeeder 会用 SecureRandom
+  #   即时生成 16 字节 URL-Safe 随机口令，并以 WARN 级别一次性打印到启动日志；
+  #   生产部署必须经环境变量固定注入，否则每次新库首启都会不同且不可追溯。
   superadmin:
     username: ${AIBI_SUPERADMIN_USERNAME:superadmin}
-    password: ${AIBI_SUPERADMIN_PASSWORD:[redacted-default-pwd]}
+    password: ${AIBI_SUPERADMIN_PASSWORD:}
   # RBAC 与组织协同（《角色权限体系与组织协同设计》11.3）
   rbac:
     # 应急回退开关：false = 只按升级前的二元角色（SUPER_ADMIN/USER）判定，仅用于权限体系故障时保业务可用
@@ -234,7 +237,7 @@ aibi:
     # 素材根目录（扁平存储 uuid.扩展名，不可猜）；公开访问 `/api/public/materials/{file}` 已在 SecurityConfig 放行
     dir: ${AIBI_MATERIALS_DIR:./data/materials}
     max-size-mb: 5
-  # 演示数据（DataSeeder 播种）：登录 admin/[see-startup-log] → 租户 1 → 数据源 1（指向演示业务库 aibi_demo_sales）
+  # 演示数据（DataSeeder 播种）：登录 admin / <AIBI_DEMO_ADMIN_PASSWORD 或首次启动日志中随机口令>→ 租户 1 → 数据源 1（指向演示业务库 aibi_demo_sales）
   # 说明：仅在 data_source 无 id=1 记录时才播种（空库引导）；正常演示数据由 t3 播种脚本经 API 建 10 个数据源占据 id=1..10，DataSeeder 会自动跳过。
   demo:
     tenant-id: 1

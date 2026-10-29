@@ -3,19 +3,27 @@
   后端接口联调冒烟脚本（Feature 1 超管后台 + Feature 2 指标/驾驶舱）。
   直接打到后端 :8080（前端 Vite 代理只是透传）。
 
-  仅使用「开发默认登录口令」（superadmin/[redacted-default-pwd]、admin/[see-startup-log]，均为 application.yml 内置默认，
-  非真实密钥）；MySQL / DeepSeek 等真实密钥只在启动进程时经环境变量注入，不出现在本脚本。
-  可用 -SuperPass / env:AIBI_SUPERADMIN_PASSWORD 覆盖超管口令。
+  仅使用首次播种产生的开发口令（开源仓不预置硬编码默认值）：
+  superadmin 优先取 -SuperPass / env:AIBI_SUPERADMIN_PASSWORD；admin 优先取 -TenantPass / env:AIBI_DEMO_ADMIN_PASSWORD；
+  两者都未传入时脚本启动即抛错，提醒从后端启动日志中取 WARN 行随机口令。
+  MySQL / DeepSeek 等真实密钥只在启动进程时经环境变量注入，不出现在本脚本。
 
-  用法： powershell -ExecutionPolicy Bypass -File backend\api-smoke.ps1 [-BaseUrl http://localhost:8080]
+  用法： powershell -ExecutionPolicy Bypass -File backend\api-smoke.ps1 [-BaseUrl http://localhost:8080] [-SuperPass <pwd>] [-TenantPass <pwd>]
 #>
 param(
     [string]$BaseUrl = "http://localhost:8080",
     [string]$SuperUser = "superadmin",
-    [string]$SuperPass = $(if ($env:AIBI_SUPERADMIN_PASSWORD) { $env:AIBI_SUPERADMIN_PASSWORD } else { "[redacted-default-pwd]" }),
+    [string]$SuperPass = $env:AIBI_SUPERADMIN_PASSWORD,
     [string]$TenantUser = "admin",
-    [string]$TenantPass = ""
+    [string]$TenantPass = $env:AIBI_DEMO_ADMIN_PASSWORD
 )
+
+if (-not $SuperPass) {
+    throw "缺少超管口令：请传入 -SuperPass 或设置环境变量 AIBI_SUPERADMIN_PASSWORD（开源仓不预置默认口令，首次启动日志 WARN 行可取随机口令）。"
+}
+if (-not $TenantPass) {
+    throw "缺少演示管理员口令：请传入 -TenantPass 或设置环境变量 AIBI_DEMO_ADMIN_PASSWORD（同上）。"
+}
 
 $ErrorActionPreference = "Stop"
 $script:pass = 0

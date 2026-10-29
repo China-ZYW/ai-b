@@ -229,7 +229,7 @@ ENTERPRISE ──▶  DATABASE / SCHEMA  独立元数据库 或 独立 schema（
 
 - **配额门禁**：`QuotaService.checkAndConsume(tenantId)` 读取 `tenant.daily_limit/total_limit/expire_at`——使用期限到期抛 `TENANT_EXPIRED(40304)`、租户停用抛 `TENANT_DISABLED(40305)`；日计数落 `quota_usage`（`INSERT ... ON DUPLICATE KEY UPDATE used=used+1`，按 `tenant_id+usage_date` 累加）、累计走 `tenant.total_used`，超限回滚并抛 `FREE_LIMIT_EXCEEDED(42901)`（日限）/ `TOTAL_LIMIT_EXCEEDED(42903)`（总限）。配额校验置于并发护栏**之前**，超限不误落历史、不占许可。
 - **计费**：LLM 成本按租户归集（token 计量），支撑"分层订阅 + 用量"混合计费。
-- **平台超管**：`app_user.role ∈ {SUPER_ADMIN, USER}`，超管 `tenant_id=0` 可跨租户运营；JWT 带 `role` 声明，`/api/admin/**` 需 `ROLE_SUPER_ADMIN`。首个超管由 `DataSeeder` 播种（用户名 `superadmin`、口令取环境变量 `AIBI_SUPERADMIN_PASSWORD`、默认 `[redacted-default-pwd]`）；后台可管理租户 CRUD、账号、大模型配置（全局默认 + 租户覆盖，`api_key` 经 `CredentialCipher` 加密落 `llm_config`、只写不读）、套餐/期限/配额。
+- **平台超管**：`app_user.role ∈ {SUPER_ADMIN, USER}`，超管 `tenant_id=0` 可跨租户运营；JWT 带 `role` 声明，`/api/admin/**` 需 `ROLE_SUPER_ADMIN`。首个超管由 `DataSeeder` 播种（用户名 `superadmin`、口令取环境变量 `AIBI_SUPERADMIN_PASSWORD`；**开源仓不预置硬编码默认口令**，留空时 `TenantSeeder` 会用 SecureRandom 即时生成随机强口令并以 WARN 日志一次性打印）；后台可管理租户 CRUD、账号、大模型配置（全局默认 + 租户覆盖，`api_key` 经 `CredentialCipher` 加密落 `llm_config`、只写不读）、套餐/期限/配额。
 
 ---
 

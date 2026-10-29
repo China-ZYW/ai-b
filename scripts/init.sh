@@ -202,5 +202,5 @@ echo
 printf '\033[32mDone. Open:\033[0m\n'
 echo "  Frontend: http://localhost:$FRONTEND_PORT/"
 echo "  Backend : http://localhost:$BACKEND_PORT/actuator/health"
-echo "  Login   : admin / [see-startup-log]  (superadmin uses AIBI_SUPERADMIN_PASSWORD)"
+echo "  Login   : superadmin / admin — 口令请取后端首次启动日志的 WARN 行随机值，或先在 backend/local.env 中写入 AIBI_SUPERADMIN_PASSWORD / AIBI_DEMO_ADMIN_PASSWORD"
 echo "Logs: backend/run.log , frontend/vite.log   (stop: kill \$(cat backend/.backend.pid frontend/.vite.pid))"

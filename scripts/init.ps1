@@ -261,5 +261,5 @@ Write-Host ""
 Write-Host "Done. Open:" -ForegroundColor Green
 Write-Host "  Frontend: http://localhost:$FrontendPort/"
 Write-Host "  Backend : http://localhost:$BackendPort/actuator/health"
-Write-Host "  Login   : admin / [see-startup-log]  (superadmin uses AIBI_SUPERADMIN_PASSWORD)"
+Write-Host "  Login   : superadmin / admin — 口令取后端首次启动日志 WARN 行中的随机值；或在 backend/local.env 写入 AIBI_SUPERADMIN_PASSWORD / AIBI_DEMO_ADMIN_PASSWORD 后重启"
 Write-Host "Backend log: $runLog"

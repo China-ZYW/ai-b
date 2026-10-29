@@ -37,8 +37,8 @@ async function onSubmit(): Promise<void> {
 }
 
 function fillDemo(): void {
+  // 开源仓不预置任何硬编码口令；仅预填演示用户名，口令需从后端首次启动日志 WARN 行取。
   form.username = 'admin'
-  form.password = ''
 }
 
 /** 生成第 i 滴雨的确定性"伪随机"参数：分布均匀、每次渲染一致（用负 delay 让开场就在半空落雨）。 */
@@ -121,7 +121,7 @@ function dropStyle(i: number): Record<string, string> {
           <router-link to="/register" class="link">立即注册</router-link>
         </div>
         <div class="demo-hint" @click="fillDemo">
-          <el-icon><InfoFilled /></el-icon> 演示账号：admin / [see-startup-log]（点击填充）
+          <el-icon><InfoFilled /></el-icon> 演示账号：admin（口令请取后端首次启动日志 WARN 行随机值，或预先在 backend/local.env 写入 AIBI_DEMO_ADMIN_PASSWORD）
         </div>
       </div>
     </div>

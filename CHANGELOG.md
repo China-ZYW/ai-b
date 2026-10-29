@@ -27,6 +27,8 @@
 - **落地页专有品牌**：`frontend/src/views/landing/landingContent.ts` 里 "WorkBuddy" 连接器改为通用的 "Claude Desktop 连接器"，客户端列表改为公开产品。
 
 ### Security
+- **移除硬编码默认口令**：`application.yml` 中 `AIBI_SUPERADMIN_PASSWORD` 与 `AIBI_DEMO_ADMIN_PASSWORD` 均改为空默认；`TenantSeeder` 首次播种时如未注入，会用 `SecureRandom` 即时生成 22 位 URL-Safe 随机口令并以 WARN 日志一次性打印（新局部无已可预测的默认入口）。
+- **全仓扫描清除示例口令**：文档 / README / `LoginView.vue` 演示行 / `api-smoke.ps1` / `feature-smoke.ps1` / `e2e_lib.py` / `init.ps1` / `init.sh` / `local.env.example` / `SaaS多租户与数据源接入设计.md` 中的超级管理员与演示账号默认口令一律改为环境变量占位或首启随机生成并经日志提示。
 - 补齐 `SECURITY.md`：漏洞披露渠道、已内建五道安全红线说明、部署加固七条建议。
 - `.gitignore` 全量补齐：凭据 / 构建产物 / 上传目录 / IDE / Python 缓存 / 回滚备份，防"未跟踪但未忽略"造成的意外入库。
 

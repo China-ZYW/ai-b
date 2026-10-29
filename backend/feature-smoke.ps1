@@ -9,8 +9,9 @@
     问题4  推荐问题            —— 依 schema 生成，永不报错，返回非空字符串数组
     问题5/6 大屏主题           —— 六套预设 key 均可持久化并回显(dark/light/tech/emerald/sunset/purple)
 
-  仅使用「开发默认登录口令」（admin/[see-startup-log]，为 application.yml 内置默认，非真实密钥）；
-  MySQL / DeepSeek 等真实密钥只在启动后端进程时经环境变量注入，不出现在本脚本。
+  仅使用首次播种产生的开发口令（开源仓不预置硬编码默认值）：
+  admin 优先取 -TenantPass / env:AIBI_DEMO_ADMIN_PASSWORD；两者都未传入时启动即抛错，
+  提醒从后端启动日志中取 WARN 行随机口令。MySQL / DeepSeek 等真实密钥只在启动后端进程时经环境变量注入，不出现在本脚本。
 
   用法：
     powershell -ExecutionPolicy Bypass -File backend\feature-smoke.ps1 [-BaseUrl http://localhost:8080]
@@ -20,9 +21,13 @@
 param(
     [string]$BaseUrl = "http://localhost:8080",
     [string]$TenantUser = "admin",
-    [string]$TenantPass = "",
+    [string]$TenantPass = $env:AIBI_DEMO_ADMIN_PASSWORD,
     [string]$XlsxPath = ""
 )
+
+if (-not $TenantPass) {
+    throw "缺少演示管理员口令：请传入 -TenantPass 或设置环境变量 AIBI_DEMO_ADMIN_PASSWORD（开源仓不预置默认口令，首次启动日志 WARN 行可取随机口令）。"
+}
 
 $ErrorActionPreference = "Stop"
 # 让中文输出在任意控制台代码页下都正确显示（避免 GBK 控制台把 UTF-8 输出显示为乱码）。
