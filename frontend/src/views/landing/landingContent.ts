@@ -61,12 +61,12 @@ export const stats = [
   { num: '0', label: '代码取数门槛' }
 ]
 
-// MCP 开放生态：真实连接器实测截图（public/screenshots/）
+// MCP 开放生态：主流客户端接入示例（实际展示时可用公开产品截图或 UI 示意图）
 export const mcpConnectors = [
   {
-    src: '/screenshots/mcp-workbuddy.png',
-    name: 'WorkBuddy 连接器',
-    desc: '在 WorkBuddy 里启用 aibi 连接器，对话直接查询订单月度数据——自动出表格、趋势图与结论，一句话完成经营盘点。',
+    src: '/screenshots/mcp-claude.png',
+    name: 'Claude Desktop 连接器',
+    desc: '在 Claude Desktop 里启用 aibi MCP 连接器，对话直接查询订单月度数据——自动出表格、趋势图与结论，一句话完成经营盘点。',
     tag: '一句话问数'
   },
   {
@@ -78,7 +78,7 @@ export const mcpConnectors = [
 ]
 export const mcpSteps = [
   { no: '01', title: '签发访问令牌', desc: '控制台一键签发个人访问令牌（PAT），随时可吊销，令牌即身份。' },
-  { no: '02', title: '配置 MCP 端点', desc: '在豆包 / WorkBuddy / Cursor 等 AI 客户端填入 MCP 地址与令牌，即插即用。' },
+  { no: '02', title: '配置 MCP 端点', desc: '在 Claude Desktop / 豆包 / Cursor 等 AI 客户端填入 MCP 地址与令牌，即插即用。' },
   { no: '03', title: '对话即取数', desc: '在 AI 客户端用自然语言问业务库，返回表格、图表乃至成稿报告。' }
 ]
 export const mcpCaps = [
