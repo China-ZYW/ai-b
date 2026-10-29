@@ -10,6 +10,7 @@
 ## [Unreleased]
 
 ### Added
+- **在线体验入口**：README 顶部与「🎯 在线体验」新章节挂载公网 Demo <https://iyun.ink/>，与仓库同版本；明确提醒 Demo 数据公共、会重置、勿输入真实凭据。
 - **MCP 协议补齐**：`resources/templates/list` / `prompts/list` / `completion/complete` 分派与空实现；`initialize.capabilities` 声明扩展。
 - **MCP `outputSchema`**：`list_datasources` / `list_metrics` 声明结构化返回值 JSON Schema，客户端可自动渲染。
 - **MCP 传输协商**：`MCP-Protocol-Version` 请求头读取 + 响应头回显（不做拒绝，仅作可观测）。
